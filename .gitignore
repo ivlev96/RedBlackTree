@@ -1,0 +1,9 @@
+/.vs/
+*/x64/*
+*/GeneratedFiles/
+*/Debug/*
+*/Release/*
+/packages/
+/RedBlackTree/serialization.h
+/RedBlackTree/serialization.cpp
+/Tests/log.txt

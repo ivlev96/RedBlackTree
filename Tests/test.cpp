@@ -51,7 +51,7 @@ namespace
 }
 
 
-TEST(RedBlackTreeTest, IsEmpty) 
+TEST(RedBlackTreeTest, Empty) 
 {
 	EXPECT_TRUE(RedBlackTreeTest::isEmpty(RedBlackTree<int>{}));
 	EXPECT_TRUE(RedBlackTreeTest::isEmpty(RedBlackTree<std::string>{}));
@@ -59,7 +59,7 @@ TEST(RedBlackTreeTest, IsEmpty)
 	EXPECT_TRUE(RedBlackTreeTest::isEmpty(RedBlackTree<RedBlackTree<RedBlackTree<int>>>{}));
 }
 
-TEST(RedBlackTreeTest, IsRedBlackTree) 
+TEST(RedBlackTreeTest, RedBlackTree) 
 {
 	std::ofstream log("log.txt");
 	EXPECT_TRUE(log.is_open());
@@ -69,9 +69,16 @@ TEST(RedBlackTreeTest, IsRedBlackTree)
 	log.close();
 	
 	EXPECT_EQ(tree.size(), N);
+	EXPECT_TRUE(RedBlackTreeTest::allPointersAreValid(tree));
 	EXPECT_TRUE(RedBlackTreeTest::isBinarySearchTree(tree));
 	EXPECT_TRUE(RedBlackTreeTest::rootIsBlack(tree));
 	EXPECT_TRUE(RedBlackTreeTest::bothChildrenOfRedAreBlack(tree));
 	EXPECT_TRUE(RedBlackTreeTest::blackLengthIsCorrectForEveryNode(tree));
+	EXPECT_TRUE(RedBlackTreeTest::isRotateLeftCorrect<int>());
+}
 
+TEST(RedBlackTreeTest, Rotates)
+{
+	EXPECT_TRUE(RedBlackTreeTest::isRotateLeftCorrect<int>());
+	EXPECT_TRUE(RedBlackTreeTest::isRotateRightCorrect<int>());
 }

@@ -17,14 +17,21 @@ public:
 	template<typename IterType>
 	RedBlackTree(const IterType& begin, const IterType& end);
 
+	RedBlackTree(RedBlackTree<T, Less>&& other);
+	RedBlackTree(const RedBlackTree<T, Less>& other) = delete;
+
 	std::size_t size() const;
 
 	void insert(const T& value);
 
+	void clear();
+
+	bool operator==(const RedBlackTree<T, Less>& other);
+
 	std::string serialize(bool compact = false) const;
 
 private:
-	Less less;
+	Less m_less;
 	std::unique_ptr<Node<T>> m_root;
 	std::size_t m_size;
 };
@@ -33,7 +40,7 @@ private:
 template<typename T, typename Less>
 inline RedBlackTree<T, Less>::RedBlackTree()
 	: m_root{ nullptr }
-	, less{}
+	, m_less{}
 	, m_size{ 0 }
 {
 }
@@ -57,6 +64,14 @@ inline RedBlackTree<T, Less>::RedBlackTree(const std::initializer_list<T>& value
 }
 
 template<typename T, typename Less>
+inline RedBlackTree<T, Less>::RedBlackTree(RedBlackTree<T, Less>&& other)
+	: m_less(std::move(other.m_less))
+	, m_size(std::move(other.m_size))
+	, m_root(std::move(other.m_root))
+{
+}
+
+template<typename T, typename Less>
 inline std::size_t RedBlackTree<T, Less>::size() const
 {
 	return m_size;
@@ -75,7 +90,7 @@ inline void RedBlackTree<T, Less>::insert(const T& value)
 	auto* current = m_root.get();
 	while (true)
 	{
-		if (less(value, current->value))
+		if (m_less(value, current->value))
 		{
 			if (current->left == nullptr)
 			{
@@ -103,6 +118,29 @@ inline void RedBlackTree<T, Less>::insert(const T& value)
 		}
 	}
 	//current points to new inserted Node
+}
+
+template<typename T, typename Less>
+inline void RedBlackTree<T, Less>::clear()
+{
+	m_root.reset();
+	m_size = 0;
+}
+
+template<typename T, typename Less>
+inline bool RedBlackTree<T, Less>::operator==(const RedBlackTree<T, Less>& other)
+{
+	if (size() != other.size())
+	{
+		return false;
+	}
+
+	if (size() == 0)
+	{
+		return true;
+	}
+
+	return *m_root == *other.m_root;
 }
 
 template<typename T, typename Less>

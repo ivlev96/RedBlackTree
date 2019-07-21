@@ -14,8 +14,6 @@ public:
 	Node(const T& value, const Color& color, Node* parent = nullptr);
 
 	bool operator==(const Node<T>& other) const;
-	void rotateLeft();
-	void rotateRight();
 
 	rapidjson::Document toJson() const;
 
@@ -92,76 +90,6 @@ inline bool Node<T>::operator==(const Node<T>& other) const
 	}
 
 	return equal;
-}
-
-template<typename T>
-inline void Node<T>::rotateLeft()
-{
-	ASSERT_NOT_NULL(right);
-	if (right == nullptr)
-	{
-		return;
-	}
-
-	std::unique_ptr<Node> leftChildOfRight{ std::move(right->left) };
-
-	Node* rightPtr = right.get();
-	right->parent = parent;
-	if (parent != nullptr)
-	{
-		if (parent->left.get() == this)
-		{
-			right->left = std::move(parent->left);
-			parent->left = std::move(right);
-		}
-		else
-		{
-			right->left = std::move(parent->right);
-			parent->right = std::move(right);
-		}
-	}
-	parent = rightPtr;
-
-	right = std::move(leftChildOfRight);
-	if (right != nullptr)
-	{
-		right->parent = this;
-	}
-}
-
-template<typename T>
-inline void Node<T>::rotateRight()
-{
-	ASSERT_NOT_NULL(left);
-	if (left == nullptr)
-	{
-		return;
-	}
-
-	std::unique_ptr<Node> rightChildOfLeft{ std::move(left->right) };
-
-	Node* leftPtr = left.get();
-	left->parent = parent;
-	if (parent != nullptr)
-	{
-		if (parent->left.get() == this)
-		{
-			left->right = std::move(parent->left);
-			parent->left = std::move(left);
-		}
-		else
-		{
-			left->right = std::move(parent->right);
-			parent->right = std::move(left);
-		}
-	}
-	parent = leftPtr;
-
-	left = std::move(rightChildOfLeft);
-	if (left != nullptr)
-	{
-		left->parent = this;
-	}
 }
 
 template<typename T>

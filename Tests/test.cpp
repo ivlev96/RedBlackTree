@@ -22,17 +22,16 @@ namespace
 		}
 		int operator()() const
 		{
-			return rand() % 10000;
+			return rand() % 100'000;
 		}
 	};
 
 	template<typename T, typename Less = std::less<T>, typename GeneratorType = Generator<T>>
-	RedBlackTree<T, Less> createRandomTree(std::size_t N, std::ostream& os = std::cout)
+	RedBlackTree<T, Less> createRandomTree(std::size_t N, std::ostream& os = std::cout, GeneratorType generate = {})
 	{
 		std::vector<T> elements;
 		elements.reserve(N);
 
-		GeneratorType generate;
 		for (std::size_t i = 0; i < N; ++i)
 		{
 			elements.push_back(generate());
@@ -64,7 +63,7 @@ TEST(RedBlackTreeTest, RedBlackTree)
 	std::ofstream log("log.txt");
 	EXPECT_TRUE(log.is_open());
 
-	const std::size_t N = 10;
+	const std::size_t N = 100'000;
 	const RedBlackTree<int> tree(createRandomTree<int>(N, log));
 	log.close();
 	
@@ -74,11 +73,4 @@ TEST(RedBlackTreeTest, RedBlackTree)
 	EXPECT_TRUE(RedBlackTreeTest::rootIsBlack(tree));
 	EXPECT_TRUE(RedBlackTreeTest::bothChildrenOfRedAreBlack(tree));
 	EXPECT_TRUE(RedBlackTreeTest::blackLengthIsCorrectForEveryNode(tree));
-	EXPECT_TRUE(RedBlackTreeTest::isRotateLeftCorrect<int>());
-}
-
-TEST(RedBlackTreeTest, Rotates)
-{
-	EXPECT_TRUE(RedBlackTreeTest::isRotateLeftCorrect<int>());
-	EXPECT_TRUE(RedBlackTreeTest::isRotateRightCorrect<int>());
 }

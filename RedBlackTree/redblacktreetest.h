@@ -16,12 +16,6 @@ public:
 	TEST_DECL(bothChildrenOfRedAreBlack);
 	TEST_DECL(blackLengthIsCorrectForEveryNode);
 
-	template<typename T, typename Less = std::less<T>>
-	static bool isRotateLeftCorrect();
-
-	template<typename T, typename Less = std::less<T>>
-	static bool isRotateRightCorrect();
-
 #undef TEST_DECL
 };
 
@@ -42,7 +36,7 @@ inline bool isBinarySearchTreeImpl(const Node<T>* node, const Less& less)
 		return true;
 	}
 
-	const bool leftIsLess = node->left == nullptr || less(node->left->value, node->value);
+	const bool leftIsLess = node->left == nullptr || !less(node->value, node->left->value);
 	const bool rightIsGreater = node->right == nullptr || !less(node->right->value, node->value);
 
 	return
@@ -127,26 +121,6 @@ std::pair<bool, std::size_t> blackLengthIsCorrectForEveryNodeImpl(const Node<T>*
 TEST_DEF(blackLengthIsCorrectForEveryNode)
 {
 	return blackLengthIsCorrectForEveryNodeImpl(tree.m_root.get(), 1).first;
-}
-
-template<typename T, typename Less>
-inline bool RedBlackTreeTest::isRotateLeftCorrect()
-{
-	RedBlackTree<T, Less> tree{ 6, 2, 1, 4, 3, 5 };
-	tree.m_root->left->rotateLeft();
-
-	return tree == RedBlackTree<T, Less>{ 6, 4, 2, 1, 3, 5 } &&
-		allPointersAreValid(tree);
-}
-
-template<typename T, typename Less>
-inline bool RedBlackTreeTest::isRotateRightCorrect()
-{
-	RedBlackTree<T, Less> tree{ 2, 6, 4, 7, 3, 5 };
-	tree.m_root->right->rotateRight();
-
-	return tree == RedBlackTree<T, Less>{ 2, 4, 3, 6, 5, 7 } &&
-		allPointersAreValid(tree);
 }
 
 

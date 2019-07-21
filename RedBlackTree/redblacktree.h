@@ -87,8 +87,13 @@ inline std::size_t RedBlackTree<T, Less>::size() const
 template<typename T, typename Less>
 inline void RedBlackTree<T, Less>::insert(const T& value)
 {
-	++m_size;
-	fixAfterInsert(insertAsBST(value));
+	auto insertedNode = insertAsBST(value);
+
+	if (insertedNode != nullptr)
+	{
+		++m_size;
+		fixAfterInsert(insertedNode);
+	}
 }
 
 template<typename T, typename Less>
@@ -190,7 +195,7 @@ inline void RedBlackTree<T, Less>::rotateRight(std::unique_ptr<Node<T>>& node)
 }
 
 template<typename T, typename Less>
-inline Node<T>* RedBlackTree<T, Less>::insertAsBST(const T & value)
+inline Node<T>* RedBlackTree<T, Less>::insertAsBST(const T& value)
 {
 	if (m_root == nullptr)
 	{
@@ -214,7 +219,7 @@ inline Node<T>* RedBlackTree<T, Less>::insertAsBST(const T & value)
 				current = current->left.get();
 			}
 		}
-		else
+		else if (m_less(current->value, value))
 		{
 			if (current->right == nullptr)
 			{
@@ -226,6 +231,10 @@ inline Node<T>* RedBlackTree<T, Less>::insertAsBST(const T & value)
 			{
 				current = current->right.get();
 			}
+		}
+		else //current->value == value
+		{
+			return nullptr;
 		}
 	}
 

@@ -6,6 +6,10 @@ namespace
 	template<typename T>
 	struct Generator
 	{
+		Generator(std::size_t N)
+		{
+			static_assert(!"Not implemented");
+		}
 		T operator()()
 		{
 			static_assert(!"Not implemented");
@@ -16,14 +20,29 @@ namespace
 	template<>
 	struct Generator<int>
 	{
-		Generator()
+		Generator(std::size_t N)
+			: m_numbers(N)
 		{
 			srand(static_cast<unsigned int>(time(0)));
+
+			int i = 0;
+			for (int& num : m_numbers)
+			{
+				num = i++;
+			}
+
+			std::random_device device;
+			std::mt19937 generator(device());
+
+			std::shuffle(m_numbers.begin(), m_numbers.end(), generator);
 		}
 		int operator()() const
 		{
-			return rand() % 100'000;
+			static std::size_t i = 0;
+			return m_numbers[(i++) % m_numbers.size()];
 		}
+
+		std::vector<int> m_numbers;
 	};
 
 	template<typename T, typename Less = std::less<T>, typename GeneratorType = Generator<T>>
@@ -49,7 +68,6 @@ namespace
 	}
 }
 
-
 TEST(RedBlackTreeTest, Empty) 
 {
 	EXPECT_TRUE(RedBlackTreeTest::isEmpty(RedBlackTree<int>{}));
@@ -64,7 +82,7 @@ TEST(RedBlackTreeTest, RedBlackTree)
 	EXPECT_TRUE(log.is_open());
 
 	const std::size_t N = 100'000;
-	const RedBlackTree<int> tree(createRandomTree<int>(N, log));
+	const RedBlackTree<int> tree(createRandomTree<int>(6*N, log, Generator<int>(N)));
 	log.close();
 	
 	EXPECT_EQ(tree.size(), N);

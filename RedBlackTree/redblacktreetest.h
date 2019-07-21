@@ -36,8 +36,8 @@ inline bool isBinarySearchTreeImpl(const Node<T>* node, const Less& less)
 		return true;
 	}
 
-	const bool leftIsLess = node->left == nullptr || !less(node->value, node->left->value);
-	const bool rightIsGreater = node->right == nullptr || !less(node->right->value, node->value);
+	const bool leftIsLess = node->left == nullptr || less(node->left->value, node->value);
+	const bool rightIsGreater = node->right == nullptr || less(node->value, node->right->value);
 
 	return
 		leftIsLess &&

@@ -81,7 +81,7 @@ TEST(RedBlackTreeTest, RedBlackTree)
 	std::ofstream log("log.txt");
 	EXPECT_TRUE(log.is_open());
 
-	const std::size_t N = 100'000;
+	const std::size_t N = 1000;
 	const RedBlackTree<int> tree(createRandomTree<int>(6*N, log, Generator<int>(N)));
 	log.close();
 	
@@ -91,4 +91,18 @@ TEST(RedBlackTreeTest, RedBlackTree)
 	EXPECT_TRUE(RedBlackTreeTest::rootIsBlack(tree));
 	EXPECT_TRUE(RedBlackTreeTest::bothChildrenOfRedAreBlack(tree));
 	EXPECT_TRUE(RedBlackTreeTest::blackLengthIsCorrectForEveryNode(tree));
+}
+
+
+TEST(RedBlackTreeTest, Iterators)
+{
+	std::ofstream log("log.txt");
+	EXPECT_TRUE(log.is_open());
+
+	const std::size_t N = 1000;
+	const RedBlackTree<int> tree(createRandomTree<int>(N, log, Generator<int>(N)));
+	log.close();
+
+	EXPECT_TRUE(RedBlackTreeTest::iteratorsAreValid(tree));
+	EXPECT_TRUE(RedBlackTreeTest::reverseIteratorsAreValid(tree));
 }

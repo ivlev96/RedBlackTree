@@ -11,6 +11,7 @@
 #include <any>
 #include <set>
 #include <functional>
+#include <exception>
 
 #if defined(_DEBUG)
 

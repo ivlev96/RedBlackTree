@@ -10,11 +10,15 @@ public:
 	static bool testName(const RedBlackTree<T, Less>& tree)
 
 	TEST_DECL(isEmpty);
+
 	TEST_DECL(allPointersAreValid);
 	TEST_DECL(isBinarySearchTree);
 	TEST_DECL(rootIsBlack);
 	TEST_DECL(bothChildrenOfRedAreBlack);
 	TEST_DECL(blackLengthIsCorrectForEveryNode);
+
+	TEST_DECL(iteratorsAreValid);
+	TEST_DECL(reverseIteratorsAreValid);
 
 #undef TEST_DECL
 };
@@ -123,5 +127,19 @@ TEST_DEF(blackLengthIsCorrectForEveryNode)
 	return blackLengthIsCorrectForEveryNodeImpl(tree.m_root.get(), 1).first;
 }
 
+TEST_DEF(iteratorsAreValid)
+{
+	const std::vector<T> values(tree.cbegin(), tree.cend());
+
+	return values.size() == tree.size() &&
+		std::is_sorted(values.cbegin(), values.cend(), tree.m_less);
+}
+TEST_DEF(reverseIteratorsAreValid)
+{
+	const std::vector<T> values(tree.crbegin(), tree.crend());
+
+	return values.size() == tree.size() &&
+		std::is_sorted(values.crbegin(), values.crend(), tree.m_less);
+}
 
 #undef TEST_DEF

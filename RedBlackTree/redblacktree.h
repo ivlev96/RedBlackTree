@@ -7,8 +7,21 @@
 template<typename T, typename Less = std::less<T>>
 class RedBlackTree
 {
+private:
+	class ConstIterator;
+
 public:
 	friend class RedBlackTreeTest;
+
+	using value_type = T;
+	using reference = T& ;
+	using const_reference = const T&;
+	using size_type = std::size_t;
+	using difference_type = std::ptrdiff_t;
+	using iterator = ConstIterator;
+	using const_iterator = ConstIterator;
+	using reverse_iterator = std::reverse_iterator<iterator>;
+	using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 public:
 	RedBlackTree();
@@ -28,6 +41,18 @@ public:
 
 	bool operator==(const RedBlackTree<T, Less>& other);
 
+	iterator begin() const;
+	iterator end() const;
+
+	const_iterator cbegin() const;
+	const_iterator cend() const;
+
+	reverse_iterator rbegin() const;
+	reverse_iterator rend() const;
+
+	const_reverse_iterator crbegin() const;
+	const_reverse_iterator crend() const;
+
 	std::string serialize(bool compact = false) const;
 
 private:
@@ -41,6 +66,39 @@ private:
 	Less m_less;
 	std::unique_ptr<Node<T>> m_root;
 	std::size_t m_size;
+
+private:
+	class ConstIterator
+	{
+	public:
+		using difference_type = std::ptrdiff_t;
+		using value_type = T;
+		using pointer = T*;
+		using reference = const T&;
+		using iterator_category = std::bidirectional_iterator_tag;
+
+	public:
+		ConstIterator(const Node<T>* const root, const Node<T>* node = nullptr);
+
+		reference operator*() const;
+
+		bool operator==(const ConstIterator& other) const;
+		bool operator!=(const ConstIterator& other) const;
+
+		ConstIterator& operator++();
+		ConstIterator operator++(int);
+
+		ConstIterator& operator--();
+		ConstIterator operator--(int);
+
+	private:
+		const Node<T>* next(const Node<T>* const node) const;
+		const Node<T>* prev(const Node<T>* const node) const;
+
+	private:
+		const Node<T>* m_node;
+		const Node<T>* const m_root;
+	};
 };
 
 
@@ -117,6 +175,65 @@ inline bool RedBlackTree<T, Less>::operator==(const RedBlackTree<T, Less>& other
 	}
 
 	return *m_root == *other.m_root;
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::iterator RedBlackTree<T, Less>::begin() const
+{
+	Node<T>* current = m_root.get();
+	if (current == nullptr)
+	{
+		return { m_root.get() };
+	}
+
+	while (current->left != nullptr)
+	{
+		current = current->left.get();
+	}
+
+	return { m_root.get(), current };
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::iterator RedBlackTree<T, Less>::end() const
+{
+	return { m_root.get() };
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::const_iterator RedBlackTree<T, Less>::cbegin() const
+{
+	return begin();
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::const_iterator RedBlackTree<T, Less>::cend() const
+{
+	return end();
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::reverse_iterator RedBlackTree<T, Less>::rbegin() const
+{
+	return end();
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::reverse_iterator RedBlackTree<T, Less>::rend() const
+{
+	return begin();
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::const_reverse_iterator RedBlackTree<T, Less>::crbegin() const
+{
+	return RedBlackTree<T, Less>::const_reverse_iterator{ cend() };
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::const_reverse_iterator RedBlackTree<T, Less>::crend() const
+{
+	return RedBlackTree<T, Less>::const_reverse_iterator{ cbegin() };
 }
 
 template<typename T, typename Less>
@@ -322,4 +439,151 @@ inline void RedBlackTree<T, Less>::fixAfterInsert(Node<T>* insertedNode)
 	{
 		ASSERT(!"Invalid case");
 	}
+}
+
+template<typename T, typename Less>
+inline RedBlackTree<T, Less>::ConstIterator::ConstIterator(const Node<T>* const root, const Node<T>* node)
+	: m_root(root)
+	, m_node(node)	
+{
+
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::ConstIterator::reference RedBlackTree<T, Less>::ConstIterator::operator*() const
+{
+	if (m_node == nullptr)
+	{
+		throw std::out_of_range("Attempt to dereference end() iterator");
+	}
+	return m_node->value;
+}
+
+template<typename T, typename Less>
+inline bool RedBlackTree<T, Less>::ConstIterator::operator==(const RedBlackTree<T, Less>::ConstIterator& other) const
+{
+	return m_root == other.m_root && m_node == other.m_node;
+}
+
+template<typename T, typename Less>
+inline bool RedBlackTree<T, Less>::ConstIterator::operator!=(const RedBlackTree<T, Less>::ConstIterator& other) const
+{
+	return !(*this == other);
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::ConstIterator& RedBlackTree<T, Less>::ConstIterator::operator++()
+{
+	m_node = next(m_node);
+	return *this;
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::ConstIterator RedBlackTree<T, Less>::ConstIterator::operator++(int)
+{
+	auto copy = *this;
+	m_node = next(m_node);
+	return copy;
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::ConstIterator& RedBlackTree<T, Less>::ConstIterator::operator--()
+{
+	m_node = prev(m_node);
+	return *this;
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::ConstIterator RedBlackTree<T, Less>::ConstIterator::operator--(int)
+{
+	auto copy = *this;
+	m_node = prev(m_node);
+	return copy;
+}
+
+template<typename T, typename Less>
+inline const Node<T>* RedBlackTree<T, Less>::ConstIterator::next(const Node<T>* const node) const
+{
+	const Node<T>* nextNode = nullptr;
+
+	if (node == nullptr)
+	{
+		throw std::out_of_range("Can not increment end() iterator");
+		return nullptr;
+	}
+
+	if (node->right != nullptr)
+	{
+		nextNode = node->right.get();
+		while (nextNode->left != nullptr)
+		{
+			nextNode = nextNode->left.get();
+		}
+
+		return nextNode;
+	}
+
+	if (node->parent == nullptr)
+	{
+		return nullptr;
+	}
+
+	if (node == node->parent->left.get())
+	{
+		return node->parent;
+	}
+
+	nextNode = node;
+	while (nextNode->parent->parent != nullptr && nextNode->parent == nextNode->parent->parent->right.get())
+	{
+		nextNode = nextNode->parent;
+	}
+
+	return nextNode->parent->parent;
+}
+
+template<typename T, typename Less>
+inline const Node<T>* RedBlackTree<T, Less>::ConstIterator::prev(const Node<T>* const node) const
+{
+	const Node<T>* nextNode = nullptr;
+
+	if (node == nullptr)
+	{
+		nextNode = m_root;
+		while (nextNode->right != nullptr)
+		{
+			nextNode = nextNode->right.get();
+		}
+
+		return nextNode;
+	}
+
+	if (node->left != nullptr)
+	{
+		nextNode = node->left.get();
+		while (nextNode->right != nullptr)
+		{
+			nextNode = nextNode->right.get();
+		}
+
+		return nextNode;
+	}
+
+	if (node->parent == nullptr)
+	{
+		return nullptr;
+	}
+
+	if (node == node->parent->right.get())
+	{
+		return node->parent;
+	}
+
+	nextNode = node;
+	while (nextNode->parent->parent != nullptr && nextNode->parent == nextNode->parent->parent->left.get())
+	{
+		nextNode = nextNode->parent;
+	}
+
+	return nextNode->parent->parent;
 }

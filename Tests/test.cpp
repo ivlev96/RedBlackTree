@@ -68,7 +68,7 @@ namespace
 	}
 }
 
-TEST(RedBlackTreeTest, Constructors)
+TEST(RedBlackTreeTest, ConstructorsAndAssignment)
 {
 	std::ofstream log("log.txt");
 	EXPECT_TRUE(log.is_open());
@@ -79,6 +79,9 @@ TEST(RedBlackTreeTest, Constructors)
 
 	EXPECT_TRUE(RedBlackTreeTest::copyConstructorIsValid(tree));
 	EXPECT_TRUE(RedBlackTreeTest::moveConstructorIsValid(tree));
+
+	EXPECT_TRUE(RedBlackTreeTest::copyAssignmentIsValid(tree));
+	EXPECT_TRUE(RedBlackTreeTest::moveAssignmentIsValid(tree));
 }
 
 TEST(RedBlackTreeTest, Empty) 

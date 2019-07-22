@@ -33,6 +33,9 @@ public:
 	RedBlackTree(const RedBlackTree<T, Less>& other);
 	RedBlackTree(RedBlackTree<T, Less>&& other);
 
+	RedBlackTree& operator=(const RedBlackTree<T, Less>& other);
+	RedBlackTree& operator=(RedBlackTree<T, Less>&& other);
+
 	std::size_t size() const;
 
 	void insert(const T& value);
@@ -147,11 +150,34 @@ inline RedBlackTree<T, Less>::RedBlackTree(const RedBlackTree<T, Less>& other)
 
 template<typename T, typename Less>
 inline RedBlackTree<T, Less>::RedBlackTree(RedBlackTree<T, Less>&& other)
-	: m_less{ std::move(other.m_less) }
+	: m_root{ std::move(other.m_root) }
 	, m_size{ std::move(other.m_size) }
-	, m_root{ std::move(other.m_root) }
+	, m_less{ std::move(other.m_less) }
 {
-	other.m_size = 0;
+	other.clear();
+}
+
+template<typename T, typename Less>
+inline RedBlackTree<T, Less>& RedBlackTree<T, Less>::operator=(const RedBlackTree<T, Less>& other)
+{
+	clear();
+	m_root = other.m_root->copy();
+	m_size = other.m_size;
+	m_less = other.m_less;
+
+	return *this;
+}
+
+template<typename T, typename Less>
+inline RedBlackTree<T, Less>& RedBlackTree<T, Less>::operator=(RedBlackTree<T, Less>&& other)
+{
+	clear();
+	m_root = std::move(other.m_root);
+	m_size = std::move(other.m_size);
+	m_less = std::move(other.m_less);
+	other.clear();
+
+	return *this;
 }
 
 template<typename T, typename Less>

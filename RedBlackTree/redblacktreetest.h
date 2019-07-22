@@ -12,6 +12,9 @@ public:
 	TEST_DECL(copyConstructorIsValid);
 	TEST_DECL(moveConstructorIsValid);
 
+	TEST_DECL(copyAssignmentIsValid);
+	TEST_DECL(moveAssignmentIsValid);
+
 	TEST_DECL(isEmpty);
 
 	TEST_DECL(allPointersAreValid);
@@ -45,6 +48,24 @@ TEST_DEF(moveConstructorIsValid)
 {
 	RedBlackTree<T, Less> copyTree(tree);
 	RedBlackTree<T, Less> moveTree(std::move(copyTree));
+
+	return copyTree.size() == 0 && copyTree.m_root == nullptr &&
+		tree == moveTree;
+}
+
+TEST_DEF(copyAssignmentIsValid)
+{
+	RedBlackTree<T, Less> copy;
+	copy = tree;
+	return tree == copy;
+}
+
+TEST_DEF(moveAssignmentIsValid)
+{
+	RedBlackTree<T, Less> copyTree(tree);
+	RedBlackTree<T, Less> moveTree;
+
+	moveTree = std::move(copyTree);
 
 	return copyTree.size() == 0 && copyTree.m_root == nullptr &&
 		tree == moveTree;

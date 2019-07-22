@@ -30,8 +30,8 @@ public:
 	template<typename IterType>
 	RedBlackTree(const IterType& begin, const IterType& end);
 
+	RedBlackTree(const RedBlackTree<T, Less>& other);
 	RedBlackTree(RedBlackTree<T, Less>&& other);
-	RedBlackTree(const RedBlackTree<T, Less>& other) = delete;
 
 	std::size_t size() const;
 
@@ -39,7 +39,7 @@ public:
 
 	void clear();
 
-	bool operator==(const RedBlackTree<T, Less>& other);
+	bool operator==(const RedBlackTree<T, Less>& other) const;
 
 	iterator begin() const;
 	iterator end() const;
@@ -54,6 +54,9 @@ public:
 	const_reverse_iterator crend() const;
 
 	const_iterator find(const T& value) const;
+
+	iterator erase(const T& value);
+	iterator erase(const const_iterator& where);
 
 	std::string serialize(bool compact = false) const;
 
@@ -132,12 +135,23 @@ inline RedBlackTree<T, Less>::RedBlackTree(const std::initializer_list<T>& value
 {
 }
 
+
+template<typename T, typename Less>
+inline RedBlackTree<T, Less>::RedBlackTree(const RedBlackTree<T, Less>& other)
+	: m_root{ other.m_root->copy() }
+	, m_size{ other.m_size }
+	, m_less{ other.m_less }
+{
+
+}
+
 template<typename T, typename Less>
 inline RedBlackTree<T, Less>::RedBlackTree(RedBlackTree<T, Less>&& other)
-	: m_less(std::move(other.m_less))
-	, m_size(std::move(other.m_size))
-	, m_root(std::move(other.m_root))
+	: m_less{ std::move(other.m_less) }
+	, m_size{ std::move(other.m_size) }
+	, m_root{ std::move(other.m_root) }
 {
+	other.m_size = 0;
 }
 
 template<typename T, typename Less>
@@ -166,7 +180,7 @@ inline void RedBlackTree<T, Less>::clear()
 }
 
 template<typename T, typename Less>
-inline bool RedBlackTree<T, Less>::operator==(const RedBlackTree<T, Less>& other)
+inline bool RedBlackTree<T, Less>::operator==(const RedBlackTree<T, Less>& other) const
 {
 	if (size() != other.size())
 	{
@@ -261,6 +275,23 @@ inline typename RedBlackTree<T, Less>::const_iterator RedBlackTree<T, Less>::fin
 		}
 	}
 	return m_root.get();
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::iterator RedBlackTree<T, Less>::erase(const T& value)
+{
+	return erase(find(value));
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::iterator RedBlackTree<T, Less>::erase(const const_iterator& where)
+{
+	if (where == end())
+	{
+		return end();
+	}
+
+	return iterator(nullptr);
 }
 
 template<typename T, typename Less>

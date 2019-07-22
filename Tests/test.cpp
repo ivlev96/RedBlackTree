@@ -68,6 +68,19 @@ namespace
 	}
 }
 
+TEST(RedBlackTreeTest, Constructors)
+{
+	std::ofstream log("log.txt");
+	EXPECT_TRUE(log.is_open());
+
+	const std::size_t N = 1000;
+	const RedBlackTree<int> tree(createRandomTree<int>(N, log, Generator<int>(N)));
+	log.close();
+
+	EXPECT_TRUE(RedBlackTreeTest::copyConstructorIsValid(tree));
+	EXPECT_TRUE(RedBlackTreeTest::moveConstructorIsValid(tree));
+}
+
 TEST(RedBlackTreeTest, Empty) 
 {
 	EXPECT_TRUE(RedBlackTreeTest::isEmpty(RedBlackTree<int>{}));
@@ -107,4 +120,16 @@ TEST(RedBlackTreeTest, Iterators)
 	EXPECT_TRUE(RedBlackTreeTest::reverseIteratorsAreValid(tree));
 	EXPECT_TRUE(RedBlackTreeTest::findIsCorrect(tree));
 	EXPECT_EQ(tree.find(-1), tree.cend());
+}
+
+TEST(RedBlackTreeTest, Erase)
+{
+	std::ofstream log("log.txt");
+	EXPECT_TRUE(log.is_open());
+
+	const std::size_t N = 1000;
+	const RedBlackTree<int> tree(createRandomTree<int>(N, log, Generator<int>(N)));
+	log.close();
+	
+	EXPECT_TRUE(RedBlackTreeTest::eraseIsValid(tree));
 }

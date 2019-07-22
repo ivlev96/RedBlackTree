@@ -9,6 +9,9 @@ public:
 	template<typename T, typename Less = std::less<T>> \
 	static bool testName(const RedBlackTree<T, Less>& tree)
 
+	TEST_DECL(copyConstructorIsValid);
+	TEST_DECL(moveConstructorIsValid);
+
 	TEST_DECL(isEmpty);
 
 	TEST_DECL(allPointersAreValid);
@@ -17,10 +20,14 @@ public:
 	TEST_DECL(bothChildrenOfRedAreBlack);
 	TEST_DECL(blackLengthIsCorrectForEveryNode);
 
+	TEST_DECL(isRedBlackTree);
+
 	TEST_DECL(iteratorsAreValid);
 	TEST_DECL(reverseIteratorsAreValid);
 
 	TEST_DECL(findIsCorrect);
+
+	TEST_DECL(eraseIsValid);
 
 #undef TEST_DECL
 };
@@ -28,6 +35,20 @@ public:
 #define TEST_DEF(testName) \
 template<typename T, typename Less> \
 inline bool RedBlackTreeTest::testName(const RedBlackTree<T, Less>& tree)
+
+TEST_DEF(copyConstructorIsValid)
+{
+	return tree == RedBlackTree<T, Less>(tree);
+}
+
+TEST_DEF(moveConstructorIsValid)
+{
+	RedBlackTree<T, Less> copyTree(tree);
+	RedBlackTree<T, Less> moveTree(std::move(copyTree));
+
+	return copyTree.size() == 0 && copyTree.m_root == nullptr &&
+		tree == moveTree;
+}
 
 TEST_DEF(isEmpty)
 {
@@ -129,6 +150,18 @@ TEST_DEF(blackLengthIsCorrectForEveryNode)
 	return blackLengthIsCorrectForEveryNodeImpl(tree.m_root.get(), 1).first;
 }
 
+
+TEST_DEF(isRedBlackTree)
+{
+	return
+		allPointersAreValid(tree) &&
+		isBinarySearchTree(tree) &&
+		rootIsBlack(tree) &&
+		bothChildrenOfRedAreBlack(tree) &&
+		blackLengthIsCorrectForEveryNode(tree);
+}
+
+
 TEST_DEF(iteratorsAreValid)
 {
 	const std::vector<T> values(tree.cbegin(), tree.cend());
@@ -156,6 +189,31 @@ TEST_DEF(findIsCorrect)
 		}
 	}
 
+	return true;
+}
+
+TEST_DEF(eraseIsValid)
+{
+	std::vector<T> values(tree.cbegin(), tree.cend());
+
+	std::random_device device;
+	std::mt19937 generator(device());
+
+	std::shuffle(values.begin(), values.end(), generator);
+
+	RedBlackTree<T, Less> copyTree{ tree };
+	std::size_t size = copyTree.size();
+
+	for (int value : values)
+	{
+		copyTree.erase(value);
+		--size;
+
+		if (size != copyTree.size() || !isRedBlackTree(copyTree))
+		{
+			return false;
+		}
+	}
 	return true;
 }
 

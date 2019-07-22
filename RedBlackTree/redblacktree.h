@@ -53,6 +53,8 @@ public:
 	const_reverse_iterator crbegin() const;
 	const_reverse_iterator crend() const;
 
+	const_iterator find(const T& value) const;
+
 	std::string serialize(bool compact = false) const;
 
 private:
@@ -79,6 +81,8 @@ private:
 
 	public:
 		ConstIterator(const Node<T>* const root, const Node<T>* node = nullptr);
+		ConstIterator(const ConstIterator& other);
+		ConstIterator& operator=(const ConstIterator& other);
 
 		reference operator*() const;
 
@@ -97,7 +101,7 @@ private:
 
 	private:
 		const Node<T>* m_node;
-		const Node<T>* const m_root;
+		const Node<T>* m_root;
 	};
 };
 
@@ -234,6 +238,29 @@ template<typename T, typename Less>
 inline typename RedBlackTree<T, Less>::const_reverse_iterator RedBlackTree<T, Less>::crend() const
 {
 	return RedBlackTree<T, Less>::const_reverse_iterator{ cbegin() };
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::const_iterator RedBlackTree<T, Less>::find(const T& value) const
+{
+	auto current = m_root.get();
+
+	while (current != nullptr)
+	{
+		if (m_less(value, current->value))
+		{
+			current = current->left.get();
+		}
+		else if (m_less(current->value, value))
+		{
+			current = current->right.get();
+		}
+		else
+		{
+			return { m_root.get(), current };
+		}
+	}
+	return m_root.get();
 }
 
 template<typename T, typename Less>
@@ -447,6 +474,22 @@ inline RedBlackTree<T, Less>::ConstIterator::ConstIterator(const Node<T>* const 
 	, m_node(node)	
 {
 
+}
+
+template<typename T, typename Less>
+inline RedBlackTree<T, Less>::ConstIterator::ConstIterator(const ConstIterator& other)
+	: m_root(other.m_root)
+	, m_node(other.m_node)
+{
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::ConstIterator& RedBlackTree<T, Less>::ConstIterator::operator=(const ConstIterator& other)
+{
+	m_root = other.m_root;
+	m_node = other.m_node;
+
+	return *this;
 }
 
 template<typename T, typename Less>

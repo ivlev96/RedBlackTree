@@ -105,4 +105,6 @@ TEST(RedBlackTreeTest, Iterators)
 
 	EXPECT_TRUE(RedBlackTreeTest::iteratorsAreValid(tree));
 	EXPECT_TRUE(RedBlackTreeTest::reverseIteratorsAreValid(tree));
+	EXPECT_TRUE(RedBlackTreeTest::findIsCorrect(tree));
+	EXPECT_EQ(tree.find(-1), tree.cend());
 }

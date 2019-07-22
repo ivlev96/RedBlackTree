@@ -20,6 +20,8 @@ public:
 	TEST_DECL(iteratorsAreValid);
 	TEST_DECL(reverseIteratorsAreValid);
 
+	TEST_DECL(findIsCorrect);
+
 #undef TEST_DECL
 };
 
@@ -134,12 +136,27 @@ TEST_DEF(iteratorsAreValid)
 	return values.size() == tree.size() &&
 		std::is_sorted(values.cbegin(), values.cend(), tree.m_less);
 }
+
 TEST_DEF(reverseIteratorsAreValid)
 {
 	const std::vector<T> values(tree.crbegin(), tree.crend());
 
 	return values.size() == tree.size() &&
 		std::is_sorted(values.crbegin(), values.crend(), tree.m_less);
+}
+
+TEST_DEF(findIsCorrect)
+{
+	for (auto it = tree.cbegin(); it != tree.cend(); it = std::next(it))
+	{
+		auto findRes = tree.find(*it);
+		if (findRes != it || *findRes != *it)
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 #undef TEST_DEF

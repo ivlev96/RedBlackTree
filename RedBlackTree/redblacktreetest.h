@@ -41,7 +41,8 @@ inline bool RedBlackTreeTest::testName(const RedBlackTree<T, Less>& tree)
 
 TEST_DEF(copyConstructorIsValid)
 {
-	return tree == RedBlackTree<T, Less>(tree);
+	RedBlackTree<T, Less> copy(tree);
+	return isRedBlackTree(copy) && tree == copy;
 }
 
 TEST_DEF(moveConstructorIsValid)
@@ -50,14 +51,14 @@ TEST_DEF(moveConstructorIsValid)
 	RedBlackTree<T, Less> moveTree(std::move(copyTree));
 
 	return copyTree.size() == 0 && copyTree.m_root == nullptr &&
-		tree == moveTree;
+		isRedBlackTree(moveTree) && tree == moveTree;
 }
 
 TEST_DEF(copyAssignmentIsValid)
 {
 	RedBlackTree<T, Less> copy;
 	copy = tree;
-	return tree == copy;
+	return isRedBlackTree(copy) && tree == copy;
 }
 
 TEST_DEF(moveAssignmentIsValid)
@@ -68,7 +69,7 @@ TEST_DEF(moveAssignmentIsValid)
 	moveTree = std::move(copyTree);
 
 	return copyTree.size() == 0 && copyTree.m_root == nullptr &&
-		tree == moveTree;
+		isRedBlackTree(moveTree) && tree == moveTree;
 }
 
 TEST_DEF(isEmpty)
@@ -121,7 +122,7 @@ TEST_DEF(allPointersAreValid)
 
 TEST_DEF(rootIsBlack)
 {
-	return tree.m_root != nullptr && tree.m_root->color == Color::Black;
+	return tree.m_root == nullptr || tree.m_root->color == Color::Black;
 }
 
 template<typename T>

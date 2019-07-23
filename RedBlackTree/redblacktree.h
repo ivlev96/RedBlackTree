@@ -69,6 +69,9 @@ private:
 
 	Node<T>* insertAsBST(const T& value);
 	void fixAfterInsert(Node<T>* insertedNode);
+	void fixAfterErase(Node<T>* parent, bool removedNodeIsLeft);
+
+	std::unique_ptr<Node<T>>& getStorage(Node<T>& node);
 
 private:
 	Less m_less;
@@ -78,6 +81,7 @@ private:
 private:
 	class ConstIterator
 	{
+		friend class RedBlackTree;
 	public:
 		using difference_type = std::ptrdiff_t;
 		using value_type = T;
@@ -160,6 +164,10 @@ inline RedBlackTree<T, Less>::RedBlackTree(RedBlackTree<T, Less>&& other)
 template<typename T, typename Less>
 inline RedBlackTree<T, Less>& RedBlackTree<T, Less>::operator=(const RedBlackTree<T, Less>& other)
 {
+	if (this == &other)
+	{
+		return *this;
+	}
 	clear();
 	m_root = other.m_root->copy();
 	m_size = other.m_size;
@@ -171,6 +179,10 @@ inline RedBlackTree<T, Less>& RedBlackTree<T, Less>::operator=(const RedBlackTre
 template<typename T, typename Less>
 inline RedBlackTree<T, Less>& RedBlackTree<T, Less>::operator=(RedBlackTree<T, Less>&& other)
 {
+	if (this == &other)
+	{
+		return *this;
+	}
 	clear();
 	m_root = std::move(other.m_root);
 	m_size = std::move(other.m_size);
@@ -316,8 +328,70 @@ inline typename RedBlackTree<T, Less>::iterator RedBlackTree<T, Less>::erase(con
 	{
 		return end();
 	}
+	--m_size;
+	auto node = const_cast<Node<T>*>(where.m_node);
+	iterator next = std::next(where); //next will be return value
 
-	return iterator(nullptr);
+	auto current = node;
+
+	if (node->left != nullptr)
+	{
+		current = node->left.get();
+		while (current->right != nullptr)
+		{
+			current = current->right.get();
+		}
+		//current is the rightmost child of left node's child
+	}
+	else if (node->right != nullptr)
+	{
+		current = node->right.get();
+		while (current->left != nullptr)
+		{
+			current = current->left.get();
+		}
+		//current is the leftmost child of right node's child
+		next = where;
+	}
+
+	node->value = current->value;
+	auto currentsParent = current->parent;
+	const bool removedNodeIsLeft = currentsParent == nullptr ? true : 
+		current == currentsParent->left.get();
+	decltype(auto) currentUnique = getStorage(*current);
+
+	if (current->color == Color::Red)
+	{
+		//Current's color is Red and it has maximum one child and color of this child must be Black.
+		//So, both child of current are null (because of equal blackLength for current node).
+		ASSERT_NULL(current->left);
+		ASSERT_NULL(current->right);
+		currentUnique.reset();
+		return next;
+	}
+	//current->color == Color::Black
+
+	std::unique_ptr<Node<T>> currentsChildUnique = 
+		current->left == nullptr ? 
+		std::move(current->right) : 
+		std::move(current->left);
+
+	if (currentsChildUnique != nullptr && currentsChildUnique->color == Color::Red)
+	{
+		currentsChildUnique->color = Color::Black;
+		currentUnique = std::move(currentsChildUnique);
+		currentUnique->parent = currentsParent;
+		return next;
+	}
+	//currentsChild == nullptr because of equal blackLength for current node.
+	//So, current is a Black leaf
+	ASSERT_NULL(current->left);
+	ASSERT_NULL(current->right);
+
+	currentUnique.reset();
+
+	fixAfterErase(currentsParent, removedNodeIsLeft);
+	return next;
 }
 
 template<typename T, typename Less>
@@ -523,6 +597,127 @@ inline void RedBlackTree<T, Less>::fixAfterInsert(Node<T>* insertedNode)
 	{
 		ASSERT(!"Invalid case");
 	}
+}
+
+template<typename T, typename Less>
+inline void RedBlackTree<T, Less>::fixAfterErase(Node<T>* parent, bool removedNodeIsLeft)
+{
+	if (parent == nullptr)
+	{
+		//node is new root
+		return;
+	}
+
+	auto sibling = removedNodeIsLeft ?
+		parent->right.get() : parent->left.get();
+	ASSERT_NOT_NULL(sibling); //sibling must not be nullptr, because of equal blackLength for parent
+
+	if (sibling->color == Color::Red)
+	{
+		parent->color = Color::Red;
+		sibling->color = Color::Black;
+
+		if (removedNodeIsLeft)
+		{
+			rotateLeft(getStorage(*parent));
+		}
+		else
+		{
+			rotateRight(getStorage(*parent));
+		}
+	}
+	//now sibling of currentsChild is Black, node is still child of parent,
+	//but sibling could changed
+
+	sibling = removedNodeIsLeft ?
+		parent->right.get() : parent->left.get();
+	ASSERT_NOT_NULL(sibling); //sibling must not be nullptr, because of equal blackLength for parent
+
+	if (parent->color == Color::Black &&
+		(sibling->left == nullptr || sibling->left->color == Color::Black) &&
+		(sibling->right == nullptr || sibling->right->color == Color::Black))
+	{
+		//If all this nodes are black, then we should set sibling's color to Red 
+		//to set correct blackLength for parent, but it leads to invalidate
+		//blackLength for parent's parents. So, we must fix parent node.
+		sibling->color = Color::Red;
+		const bool parentIsLeft = parent->parent == nullptr ? true :
+			parent == parent->parent->left.get();
+		fixAfterErase(parent->parent, parentIsLeft);
+		return;
+	}
+
+	if (parent->color == Color::Red && //in previous case was checked that parent is Black
+		(sibling->left == nullptr || sibling->left->color == Color::Black) &&
+		(sibling->right == nullptr || sibling->right->color == Color::Black))
+	{
+		//If parent is Red, then turning it to Black increases blackLength to all ways,
+		//which are going through node (we want to do it in this function).
+		//And it also doesn't changes blackLength of all ways,
+		//which are going through sibling. This result satisfies us.
+		sibling->color = Color::Red;
+		parent->color = Color::Black;
+		return;
+	}
+	//at least one of sibling's children is Red
+
+	//We want to ensure that sibling is right child and it's right child is Red
+	//or sibling is left child and it's left child is Red
+
+	if (sibling == parent->right.get())
+	{
+		if (sibling->right == nullptr || sibling->right->color == Color::Black)
+		{
+			sibling->color = Color::Red;
+			sibling->left->color = Color::Black;
+			rotateRight(getStorage(*sibling));
+		}
+	}
+	else
+	{
+		if (sibling->left == nullptr || sibling->left->color == Color::Black)
+		{
+			sibling->color = Color::Red;
+			sibling->right->color = Color::Black;
+			rotateLeft(getStorage(*sibling));
+		}
+	}
+	//Now sibling is right child and it's right child is Red
+	//or sibling is left child and it's left child is Red
+	
+	sibling = removedNodeIsLeft ?
+		parent->right.get() : parent->left.get();
+	ASSERT_NOT_NULL(sibling); //sibling must not be nullptr, because of equal blackLength for parent
+
+	sibling->color = parent->color;
+	parent->color = Color::Black;
+
+	if (sibling == parent->right.get())
+	{
+		sibling->right->color = Color::Black;
+		rotateLeft(getStorage(*parent));
+	}
+	else
+	{
+		sibling->left->color = Color::Black;
+		rotateRight(getStorage(*parent));
+	}
+}
+
+template<typename T, typename Less>
+inline std::unique_ptr<Node<T>>& RedBlackTree<T, Less>::getStorage(Node<T>& node)
+{
+	if (node.parent == nullptr)
+	{
+		return m_root;
+	}
+
+	if (&node == node.parent->left.get())
+	{
+		return node.parent->left;
+	}
+
+	return node.parent->right;
 }
 
 template<typename T, typename Less>

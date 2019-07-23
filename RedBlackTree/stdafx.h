@@ -26,3 +26,4 @@
 #endif
 
 #define ASSERT_NOT_NULL(X) ASSERT(X != nullptr)
+#define ASSERT_NULL(X) ASSERT(X == nullptr)

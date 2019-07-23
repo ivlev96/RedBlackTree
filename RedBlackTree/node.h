@@ -13,11 +13,9 @@ struct Node
 public:
 	Node(const T& value, 
 		const Color& color, 
-		Node* parent = nullptr, 
-		std::unique_ptr<Node>&& left = nullptr, 
-		std::unique_ptr<Node>&& right = nullptr);
+		Node* parent = nullptr);
 
-	std::unique_ptr<Node> copy() const;
+	std::unique_ptr<Node> copy(Node<T>* parent = nullptr) const;
 
 	bool operator==(const Node<T>& other) const;
 
@@ -35,25 +33,23 @@ public:
 template<typename T>
 inline Node<T>::Node(const T& value,
 	const Color& color,
-	Node* parent,
-	std::unique_ptr<Node>&& left,
-	std::unique_ptr<Node>&& right)
+	Node* parent)
 	: value{ value }
 	, color{ color }
 	, parent{ parent }
-	, left{ std::move(left) }
-	, right{ std::move(right) }
+	, left{ nullptr }
+	, right{ nullptr }
 {
-
 }
 
 template<typename T>
-inline std::unique_ptr<Node<T>> Node<T>::copy() const
+inline std::unique_ptr<Node<T>> Node<T>::copy(Node<T>* parent) const
 {
-	std::unique_ptr<Node<T>> leftCopy{ left == nullptr ? nullptr : left->copy() };
-	std::unique_ptr<Node<T>> rightCopy{ right == nullptr ? nullptr : right->copy() };
+	auto copyOfThis = std::make_unique<Node<T>>(value, color, parent);
+	copyOfThis->left = left == nullptr ? nullptr : left->copy(copyOfThis.get());
+	copyOfThis->right = right == nullptr ? nullptr : right->copy(copyOfThis.get());
 
-	return std::make_unique<Node<T>>(value, color, parent, std::move(leftCopy), std::move(rightCopy));
+	return copyOfThis;
 }
 
 template<typename T>

@@ -86,15 +86,17 @@ private:
 		using difference_type = std::ptrdiff_t;
 		using value_type = T;
 		using pointer = T*;
-		using reference = const T&;
+		using reference = T&;
 		using iterator_category = std::bidirectional_iterator_tag;
 
 	public:
-		ConstIterator(const Node<T>* const root, const Node<T>* node = nullptr);
+		ConstIterator(Node<T>* const root, Node<T>* node = nullptr);
 		ConstIterator(const ConstIterator& other);
 		ConstIterator& operator=(const ConstIterator& other);
 
-		reference operator*() const;
+		value_type operator*() const;
+		reference operator*();
+		pointer operator->();
 
 		bool operator==(const ConstIterator& other) const;
 		bool operator!=(const ConstIterator& other) const;
@@ -106,12 +108,12 @@ private:
 		ConstIterator operator--(int);
 
 	private:
-		const Node<T>* next(const Node<T>* const node) const;
-		const Node<T>* prev(const Node<T>* const node) const;
+		Node<T>* next(Node<T>* node) const;
+		Node<T>* prev(Node<T>* node) const;
 
 	private:
-		const Node<T>* m_node;
-		const Node<T>* m_root;
+		Node<T>* m_node;
+		Node<T>* m_root;
 	};
 };
 
@@ -721,7 +723,7 @@ inline std::unique_ptr<Node<T>>& RedBlackTree<T, Less>::getStorage(Node<T>& node
 }
 
 template<typename T, typename Less>
-inline RedBlackTree<T, Less>::ConstIterator::ConstIterator(const Node<T>* const root, const Node<T>* node)
+inline RedBlackTree<T, Less>::ConstIterator::ConstIterator(Node<T>* const root, Node<T>* node)
 	: m_root(root)
 	, m_node(node)	
 {
@@ -745,13 +747,33 @@ inline typename RedBlackTree<T, Less>::ConstIterator& RedBlackTree<T, Less>::Con
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::ConstIterator::reference RedBlackTree<T, Less>::ConstIterator::operator*() const
+inline typename RedBlackTree<T, Less>::ConstIterator::value_type RedBlackTree<T, Less>::ConstIterator::operator*() const
 {
 	if (m_node == nullptr)
 	{
 		throw std::out_of_range("Attempt to dereference end() iterator");
 	}
 	return m_node->value;
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::ConstIterator::reference RedBlackTree<T, Less>::ConstIterator::operator*()
+{
+	if (m_node == nullptr)
+	{
+		throw std::out_of_range("Attempt to dereference end() iterator");
+	}
+	return m_node->value;
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::ConstIterator::pointer RedBlackTree<T, Less>::ConstIterator::operator->()
+{
+	if (m_node == nullptr)
+	{
+		throw std::out_of_range("Attempt to dereference end() iterator");
+	}
+	return &(m_node->value);
 }
 
 template<typename T, typename Less>
@@ -797,9 +819,9 @@ inline typename RedBlackTree<T, Less>::ConstIterator RedBlackTree<T, Less>::Cons
 }
 
 template<typename T, typename Less>
-inline const Node<T>* RedBlackTree<T, Less>::ConstIterator::next(const Node<T>* const node) const
+inline Node<T>* RedBlackTree<T, Less>::ConstIterator::next(Node<T>* node) const
 {
-	const Node<T>* nextNode = nullptr;
+	Node<T>* nextNode = nullptr;
 
 	if (node == nullptr)
 	{
@@ -838,9 +860,9 @@ inline const Node<T>* RedBlackTree<T, Less>::ConstIterator::next(const Node<T>* 
 }
 
 template<typename T, typename Less>
-inline const Node<T>* RedBlackTree<T, Less>::ConstIterator::prev(const Node<T>* const node) const
+inline Node<T>* RedBlackTree<T, Less>::ConstIterator::prev(Node<T>* node) const
 {
-	const Node<T>* nextNode = nullptr;
+	Node<T>* nextNode = nullptr;
 
 	if (node == nullptr)
 	{

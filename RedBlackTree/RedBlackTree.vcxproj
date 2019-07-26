@@ -131,6 +131,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="map.h" />
+    <ClInclude Include="maptest.h" />
     <ClInclude Include="node.h" />
     <ClInclude Include="redblacktree.h" />
     <ClInclude Include="redblacktreetest.h" />

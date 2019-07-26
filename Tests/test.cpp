@@ -1,5 +1,6 @@
 #include <redblacktree.h>
 #include <redblacktreetest.h>
+#include <maptest.h>
 
 namespace
 {
@@ -135,4 +136,10 @@ TEST(RedBlackTreeTest, Erase)
 	log.close();
 	
 	EXPECT_TRUE(RedBlackTreeTest::eraseIsValid(tree));
+}
+
+
+TEST(MapTest, Basic)
+{
+	EXPECT_TRUE(MapTest::basicTest(Map<int, int>()));
 }

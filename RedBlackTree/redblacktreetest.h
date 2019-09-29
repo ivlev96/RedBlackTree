@@ -223,7 +223,7 @@ TEST_DEF(eraseIsValid)
 
 	std::shuffle(values.begin(), values.end(), generator);
 
-	RedBlackTree<T, Less> copyTree{ tree };
+	RedBlackTree<T, Less> copyTree(tree);
 	std::size_t size = copyTree.size();
 
 	for (int value : values)

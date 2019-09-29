@@ -38,7 +38,7 @@ public:
 
 	std::size_t size() const;
 
-	void insert(const T& value);
+	const_iterator insert(const T& value);
 
 	void clear();
 
@@ -88,6 +88,7 @@ private:
 		using pointer = T*;
 		using reference = T&;
 		using iterator_category = std::bidirectional_iterator_tag;
+		using const_pointer = const T*;
 
 	public:
 		ConstIterator(Node<T>* const root, Node<T>* node = nullptr);
@@ -96,6 +97,7 @@ private:
 
 		value_type operator*() const;
 		reference operator*();
+		const_pointer operator->() const;
 		pointer operator->();
 
 		bool operator==(const ConstIterator& other) const;
@@ -201,7 +203,7 @@ inline std::size_t RedBlackTree<T, Less>::size() const
 }
 
 template<typename T, typename Less>
-inline void RedBlackTree<T, Less>::insert(const T& value)
+inline typename RedBlackTree<T, Less>::const_iterator RedBlackTree<T, Less>::insert(const T& value)
 {
 	auto insertedNode = insertAsBST(value);
 
@@ -210,6 +212,8 @@ inline void RedBlackTree<T, Less>::insert(const T& value)
 		++m_size;
 		fixAfterInsert(insertedNode);
 	}
+
+	return { m_root.get(), insertedNode };
 }
 
 template<typename T, typename Less>
@@ -764,6 +768,16 @@ inline typename RedBlackTree<T, Less>::ConstIterator::reference RedBlackTree<T, 
 		throw std::out_of_range("Attempt to dereference end() iterator");
 	}
 	return m_node->value;
+}
+
+template<typename T, typename Less>
+inline typename RedBlackTree<T, Less>::ConstIterator::const_pointer RedBlackTree<T, Less>::ConstIterator::operator->() const
+{
+	if (m_node == nullptr)
+	{
+		throw std::out_of_range("Attempt to dereference end() iterator");
+	}
+	return &(m_node->value);
 }
 
 template<typename T, typename Less>

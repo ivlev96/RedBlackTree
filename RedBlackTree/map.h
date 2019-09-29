@@ -83,8 +83,7 @@ inline ValueType& Map<KeyType, ValueType, Less>::operator[](const KeyType& key)
 	auto it = find({ key, {} });
 	if (it == cend())
 	{
-		insert({ key, {} }); 
-		it = find({ key, {} });
+		it = insert({ key, {} }); 
 	}
 	return it->second;
 }
@@ -92,8 +91,12 @@ inline ValueType& Map<KeyType, ValueType, Less>::operator[](const KeyType& key)
 template<typename KeyType, typename ValueType, typename Less>
 inline const ValueType& Map<KeyType, ValueType, Less>::operator[](const KeyType& key) const
 {
-	auto it = find({ key, {} });
-	return it == cend() ? {} : it->second;
+	const auto it = find({ key, {} });
+	if (it == cend())
+	{
+		throw std::out_of_range("invalid map<K, T> key");
+	}
+	return it->second;
 }
 
 template<typename KeyType, typename ValueType, typename Less>

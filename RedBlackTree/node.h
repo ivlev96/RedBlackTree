@@ -43,9 +43,9 @@ inline Node<T>::Node(const T& value,
 }
 
 template<typename T>
-inline std::unique_ptr<Node<T>> Node<T>::copy(Node<T>* parent) const
+inline std::unique_ptr<Node<T>> Node<T>::copy(Node<T>* parentNode) const
 {
-	auto copyOfThis = std::make_unique<Node<T>>(value, color, parent);
+	auto copyOfThis = std::make_unique<Node<T>>(value, color, parentNode);
 	copyOfThis->left = left == nullptr ? nullptr : left->copy(copyOfThis.get());
 	copyOfThis->right = right == nullptr ? nullptr : right->copy(copyOfThis.get());
 

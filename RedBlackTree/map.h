@@ -33,7 +33,23 @@ public:
 	const ValueType& operator[](const KeyType& key) const;
 
 	const ValueType& at(const KeyType& key) const;
+
+	bool operator==(const Map& other) const;
+	bool operator!=(const Map& other) const;
+
 };
+
+template<typename KeyType, typename ValueType, typename Less>
+bool Map<KeyType, ValueType, Less>::operator!=(const Map& other) const
+{
+	return !(*this == other);
+}
+
+template<typename KeyType, typename ValueType, typename Less>
+bool Map<KeyType, ValueType, Less>::operator==(const Map& other) const
+{
+	return std::equal(begin(), end(), other.begin(), other.end());
+}
 
 template<typename KeyType, typename ValueType, typename Less>
 inline Map<KeyType, ValueType, Less>::Map()

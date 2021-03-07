@@ -141,5 +141,11 @@ TEST(RedBlackTreeTest, Erase)
 
 TEST(MapTest, Basic)
 {
-	EXPECT_TRUE(MapTest::basicTest(Map<int, int>()));
+	EXPECT_TRUE(MapTest::basicTest());
+}
+
+
+TEST(MapTest, Insert)
+{
+	EXPECT_TRUE(MapTest::insertTest());
 }

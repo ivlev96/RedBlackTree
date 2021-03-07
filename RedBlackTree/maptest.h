@@ -6,33 +6,50 @@ class MapTest
 public:
 
 #define TEST_DECL(testName) \
-	template<typename KeyType, typename ValueType, typename Less = std::less<KeyType>> \
-	static bool testName(const Map<KeyType, ValueType, Less>& map)
+	static bool testName()
 
 	TEST_DECL(basicTest);
+	TEST_DECL(insertTest);
 
 #undef TEST_DECL
 };
 
+using namespace std::literals;
 
 #define TEST_DEF(testName) \
-	template<typename KeyType, typename ValueType, typename Less> \
-	bool MapTest::testName(const Map<KeyType, ValueType, Less>& map)
+	bool MapTest::testName()
 
 TEST_DEF(basicTest)
 {
-	(void)map;
-	Map<std::string, int> a;
-	a["ololo"] = 5;
-	a["abc"] = 14;
-	a["ololo"] = 7;
+	Map<std::string, int> test;
+	test["ololo"s] = 5;
+	test["abc"s] = 14;
+	test["ololo"s] = 7;
+	test["abc"s]++;
 
-	a["abc"]++;
-
-	for (auto[key, value] : a)
+	Map<std::string, int> ref
 	{
-		std::cout << key << " " << value << std::endl;
-	}
+		{"abc"s, 15},
+		{"ololo"s, 7}
+	};
 
-	return true;
+	return test == ref;
+}
+
+
+TEST_DEF(insertTest)
+{
+	Map<std::string, int> test;
+    test.insert( { "3"s, 3 } );
+    test.insert( { "2"s, 2 } );
+    test.insert( { "1"s, 1 } );
+
+	Map<std::string, int> ref
+    {
+		{ "1"s, 1 },
+		{ "2"s, 2 },
+		{ "3"s, 3 }
+	};
+
+	return test == ref;
 }

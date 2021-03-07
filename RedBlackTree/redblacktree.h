@@ -675,7 +675,10 @@ inline void RedBlackTree<T, Less>::fixAfterErase(Node<T>* parent, bool removedNo
 		if (sibling->right == nullptr || sibling->right->color == Color::Black)
 		{
 			sibling->color = Color::Red;
-			sibling->left->color = Color::Black;
+			if (sibling->left)
+			{
+				sibling->left->color = Color::Black;
+			}
 			rotateRight(getStorage(*sibling));
 		}
 	}
@@ -684,7 +687,10 @@ inline void RedBlackTree<T, Less>::fixAfterErase(Node<T>* parent, bool removedNo
 		if (sibling->left == nullptr || sibling->left->color == Color::Black)
 		{
 			sibling->color = Color::Red;
-			sibling->right->color = Color::Black;
+			if (sibling->right)
+			{
+				sibling->right->color = Color::Black;
+			}
 			rotateLeft(getStorage(*sibling));
 		}
 	}

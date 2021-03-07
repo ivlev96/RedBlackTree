@@ -9,28 +9,28 @@ public:
 	template<typename T, typename Less = std::less<T>> \
 	static bool testName(const RedBlackTree<T, Less>& tree)
 
-	TEST_DECL(copyConstructorIsValid);
-	TEST_DECL(moveConstructorIsValid);
+    TEST_DECL( copyConstructorIsValid );
+    TEST_DECL( moveConstructorIsValid );
 
-	TEST_DECL(copyAssignmentIsValid);
-	TEST_DECL(moveAssignmentIsValid);
+    TEST_DECL( copyAssignmentIsValid );
+    TEST_DECL( moveAssignmentIsValid );
 
-	TEST_DECL(isEmpty);
+    TEST_DECL( isEmpty );
 
-	TEST_DECL(allPointersAreValid);
-	TEST_DECL(isBinarySearchTree);
-	TEST_DECL(rootIsBlack);
-	TEST_DECL(bothChildrenOfRedAreBlack);
-	TEST_DECL(blackLengthIsCorrectForEveryNode);
+    TEST_DECL( allPointersAreValid );
+    TEST_DECL( isBinarySearchTree );
+    TEST_DECL( rootIsBlack );
+    TEST_DECL( bothChildrenOfRedAreBlack );
+    TEST_DECL( blackLengthIsCorrectForEveryNode );
 
-	TEST_DECL(isRedBlackTree);
+    TEST_DECL( isRedBlackTree );
 
-	TEST_DECL(iteratorsAreValid);
-	TEST_DECL(reverseIteratorsAreValid);
+    TEST_DECL( iteratorsAreValid );
+    TEST_DECL( reverseIteratorsAreValid );
 
-	TEST_DECL(findIsCorrect);
+    TEST_DECL( findIsCorrect );
 
-	TEST_DECL(eraseIsValid);
+    TEST_DECL( eraseIsValid );
 
 #undef TEST_DECL
 };
@@ -39,204 +39,204 @@ public:
 template<typename T, typename Less> \
 inline bool RedBlackTreeTest::testName(const RedBlackTree<T, Less>& tree)
 
-TEST_DEF(copyConstructorIsValid)
+TEST_DEF( copyConstructorIsValid )
 {
-	RedBlackTree<T, Less> copy(tree);
-	return isRedBlackTree(copy) && tree == copy;
+    RedBlackTree<T, Less> copy( tree );
+    return isRedBlackTree( copy ) && tree == copy;
 }
 
-TEST_DEF(moveConstructorIsValid)
+TEST_DEF( moveConstructorIsValid )
 {
-	RedBlackTree<T, Less> copyTree(tree);
-	RedBlackTree<T, Less> moveTree(std::move(copyTree));
+    RedBlackTree<T, Less> copyTree( tree );
+    RedBlackTree<T, Less> moveTree( std::move( copyTree ) );
 
-	return copyTree.size() == 0 && copyTree.m_root == nullptr &&
-		isRedBlackTree(moveTree) && tree == moveTree;
+    return copyTree.size() == 0 && copyTree.m_root == nullptr &&
+        isRedBlackTree( moveTree ) && tree == moveTree;
 }
 
-TEST_DEF(copyAssignmentIsValid)
+TEST_DEF( copyAssignmentIsValid )
 {
-	RedBlackTree<T, Less> copy;
-	copy = tree;
-	return isRedBlackTree(copy) && tree == copy;
+    RedBlackTree<T, Less> copy;
+    copy = tree;
+    return isRedBlackTree( copy ) && tree == copy;
 }
 
-TEST_DEF(moveAssignmentIsValid)
+TEST_DEF( moveAssignmentIsValid )
 {
-	RedBlackTree<T, Less> copyTree(tree);
-	RedBlackTree<T, Less> moveTree;
+    RedBlackTree<T, Less> copyTree( tree );
+    RedBlackTree<T, Less> moveTree;
 
-	moveTree = std::move(copyTree);
+    moveTree = std::move( copyTree );
 
-	return copyTree.size() == 0 && copyTree.m_root == nullptr &&
-		isRedBlackTree(moveTree) && tree == moveTree;
+    return copyTree.size() == 0 && copyTree.m_root == nullptr &&
+        isRedBlackTree( moveTree ) && tree == moveTree;
 }
 
-TEST_DEF(isEmpty)
+TEST_DEF( isEmpty )
 {
-	return tree.size() == 0 && tree.m_root == nullptr;
+    return tree.size() == 0 && tree.m_root == nullptr;
 }
 
 template<typename T, typename Less>
-inline bool isBinarySearchTreeImpl(const Node<T>* node, const Less& less)
+inline bool isBinarySearchTreeImpl( const Node<T>* node, const Less& less )
 {
-	if (node == nullptr)
-	{
-		return true;
-	}
+    if ( node == nullptr )
+    {
+        return true;
+    }
 
-	const bool leftIsLess = node->left == nullptr || less(node->left->value, node->value);
-	const bool rightIsGreater = node->right == nullptr || less(node->value, node->right->value);
+    const bool leftIsLess = node->left == nullptr || less( node->left->value, node->value );
+    const bool rightIsGreater = node->right == nullptr || less( node->value, node->right->value );
 
-	return
-		leftIsLess &&
-		rightIsGreater &&
-		isBinarySearchTreeImpl(node->left.get(), less) &&
-		isBinarySearchTreeImpl(node->right.get(), less);
+    return
+        leftIsLess &&
+        rightIsGreater &&
+        isBinarySearchTreeImpl( node->left.get(), less ) &&
+        isBinarySearchTreeImpl( node->right.get(), less );
 }
 
-TEST_DEF(isBinarySearchTree)
+TEST_DEF( isBinarySearchTree )
 {
-	return isBinarySearchTreeImpl(tree.m_root.get(), tree.m_less);
-}
-
-template<typename T>
-bool allPointersAreValidImpl(const Node<T>* node)
-{
-	if (node == nullptr)
-	{
-		return true;
-	}
-
-	return
-		(node->left == nullptr || node->left->parent == node) &&
-		(node->right == nullptr || node->right->parent == node) &&
-		allPointersAreValidImpl(node->left.get()) &&
-		allPointersAreValidImpl(node->right.get());
-}
-
-TEST_DEF(allPointersAreValid)
-{
-	return allPointersAreValidImpl(tree.m_root.get());
-}
-
-TEST_DEF(rootIsBlack)
-{
-	return tree.m_root == nullptr || tree.m_root->color == Color::Black;
+    return isBinarySearchTreeImpl( tree.m_root.get(), tree.m_less );
 }
 
 template<typename T>
-bool bothChildrenOfRedAreBlackImpl(const Node<T>* node)
+bool allPointersAreValidImpl( const Node<T>* node )
 {
-	if (node == nullptr)
-	{
-		return true;
-	}
+    if ( node == nullptr )
+    {
+        return true;
+    }
 
-	return
-		(node->color == Color::Black ||
-			(node->left == nullptr || node->left->color == Color::Black) &&
-			(node->right == nullptr || node->right->color == Color::Black)) &&
-		bothChildrenOfRedAreBlackImpl(node->left.get()) &&
-		bothChildrenOfRedAreBlackImpl(node->right.get());
+    return
+        ( node->left == nullptr || node->left->parent == node ) &&
+        ( node->right == nullptr || node->right->parent == node ) &&
+        allPointersAreValidImpl( node->left.get() ) &&
+        allPointersAreValidImpl( node->right.get() );
 }
 
-TEST_DEF(bothChildrenOfRedAreBlack)
+TEST_DEF( allPointersAreValid )
 {
-	return bothChildrenOfRedAreBlackImpl(tree.m_root.get());
+    return allPointersAreValidImpl( tree.m_root.get() );
 }
 
-template<typename T> 
-std::pair<bool, std::size_t> blackLengthIsCorrectForEveryNodeImpl(const Node<T>* node, std::size_t blackLength)
+TEST_DEF( rootIsBlack )
 {
-	if (node == nullptr)
-	{
-		return { true, blackLength + 1 }; // sheets always have black color
-	}
-
-	const std::size_t thisNodeLength = node->color == Color::Black ? 1 : 0;
-
-	const auto[leftEqual, leftLength] = blackLengthIsCorrectForEveryNodeImpl(node->left.get(), blackLength + thisNodeLength);
-	if (!leftEqual)
-	{
-		return { false, leftLength };
-	}
-
-	const auto[rightEqual, rightLength] = blackLengthIsCorrectForEveryNodeImpl(node->right.get(), blackLength + thisNodeLength);
-
-	return { leftEqual && rightEqual && leftLength == rightLength, leftLength };
+    return tree.m_root == nullptr || tree.m_root->color == Color::Black;
 }
 
-TEST_DEF(blackLengthIsCorrectForEveryNode)
+template<typename T>
+bool bothChildrenOfRedAreBlackImpl( const Node<T>* node )
 {
-	return blackLengthIsCorrectForEveryNodeImpl(tree.m_root.get(), 1).first;
+    if ( node == nullptr )
+    {
+        return true;
+    }
+
+    return
+        ( node->color == Color::Black ||
+            ( node->left == nullptr || node->left->color == Color::Black ) &&
+            ( node->right == nullptr || node->right->color == Color::Black ) ) &&
+        bothChildrenOfRedAreBlackImpl( node->left.get() ) &&
+        bothChildrenOfRedAreBlackImpl( node->right.get() );
+}
+
+TEST_DEF( bothChildrenOfRedAreBlack )
+{
+    return bothChildrenOfRedAreBlackImpl( tree.m_root.get() );
+}
+
+template<typename T>
+std::pair<bool, std::size_t> blackLengthIsCorrectForEveryNodeImpl( const Node<T>* node, std::size_t blackLength )
+{
+    if ( node == nullptr )
+    {
+        return { true, blackLength + 1 }; // sheets always have black color
+    }
+
+    const std::size_t thisNodeLength = node->color == Color::Black ? 1 : 0;
+
+    const auto [leftEqual, leftLength] = blackLengthIsCorrectForEveryNodeImpl( node->left.get(), blackLength + thisNodeLength );
+    if ( !leftEqual )
+    {
+        return { false, leftLength };
+    }
+
+    const auto [rightEqual, rightLength] = blackLengthIsCorrectForEveryNodeImpl( node->right.get(), blackLength + thisNodeLength );
+
+    return { leftEqual && rightEqual && leftLength == rightLength, leftLength };
+}
+
+TEST_DEF( blackLengthIsCorrectForEveryNode )
+{
+    return blackLengthIsCorrectForEveryNodeImpl( tree.m_root.get(), 1 ).first;
 }
 
 
-TEST_DEF(isRedBlackTree)
+TEST_DEF( isRedBlackTree )
 {
-	return
-		allPointersAreValid(tree) &&
-		isBinarySearchTree(tree) &&
-		rootIsBlack(tree) &&
-		bothChildrenOfRedAreBlack(tree) &&
-		blackLengthIsCorrectForEveryNode(tree);
+    return
+        allPointersAreValid( tree ) &&
+        isBinarySearchTree( tree ) &&
+        rootIsBlack( tree ) &&
+        bothChildrenOfRedAreBlack( tree ) &&
+        blackLengthIsCorrectForEveryNode( tree );
 }
 
 
-TEST_DEF(iteratorsAreValid)
+TEST_DEF( iteratorsAreValid )
 {
-	const std::vector<T> values(tree.cbegin(), tree.cend());
+    const std::vector<T> values( tree.cbegin(), tree.cend() );
 
-	return values.size() == tree.size() &&
-		std::is_sorted(values.cbegin(), values.cend(), tree.m_less);
+    return values.size() == tree.size() &&
+        std::is_sorted( values.cbegin(), values.cend(), tree.m_less );
 }
 
-TEST_DEF(reverseIteratorsAreValid)
+TEST_DEF( reverseIteratorsAreValid )
 {
-	const std::vector<T> values(tree.crbegin(), tree.crend());
+    const std::vector<T> values( tree.crbegin(), tree.crend() );
 
-	return values.size() == tree.size() &&
-		std::is_sorted(values.crbegin(), values.crend(), tree.m_less);
+    return values.size() == tree.size() &&
+        std::is_sorted( values.crbegin(), values.crend(), tree.m_less );
 }
 
-TEST_DEF(findIsCorrect)
+TEST_DEF( findIsCorrect )
 {
-	for (auto it = tree.cbegin(); it != tree.cend(); it = std::next(it))
-	{
-		auto findRes = tree.find(*it);
-		if (findRes != it || *findRes != *it)
-		{
-			return false;
-		}
-	}
+    for ( auto it = tree.cbegin(); it != tree.cend(); it = std::next( it ) )
+    {
+        auto findRes = tree.find( *it );
+        if ( findRes != it || *findRes != *it )
+        {
+            return false;
+        }
+    }
 
-	return true;
+    return true;
 }
 
-TEST_DEF(eraseIsValid)
+TEST_DEF( eraseIsValid )
 {
-	std::vector<T> values(tree.cbegin(), tree.cend());
+    std::vector<T> values( tree.cbegin(), tree.cend() );
 
-	std::random_device device;
-	std::mt19937 generator(device());
+    std::random_device device;
+    std::mt19937 generator( device() );
 
-	std::shuffle(values.begin(), values.end(), generator);
+    std::shuffle( values.begin(), values.end(), generator );
 
-	RedBlackTree<T, Less> copyTree(tree);
-	std::size_t size = copyTree.size();
+    RedBlackTree<T, Less> copyTree( tree );
+    std::size_t size = copyTree.size();
 
-	for (int value : values)
-	{
-		copyTree.erase(value);
-		--size;
+    for ( int value : values )
+    {
+        copyTree.erase( value );
+        --size;
 
-		if (size != copyTree.size() || !isRedBlackTree(copyTree))
-		{
-			return false;
-		}
-	}
-	return true;
+        if ( size != copyTree.size() || !isRedBlackTree( copyTree ) )
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 #undef TEST_DEF

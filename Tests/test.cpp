@@ -72,7 +72,7 @@ RedBlackTree<T, Less> createRandomTree( std::size_t N, std::ostream& os = std::c
 TEST( RedBlackTreeTest, ConstructorsAndAssignment )
 {
     std::ofstream log( "log.txt" );
-    EXPECT_TRUE( log.is_open() );
+    EXPECT_TRUE( log );
 
     const std::size_t N = 1000;
     const RedBlackTree<int> tree( createRandomTree<int>( N, log, Generator<int>( N ) ) );
@@ -96,7 +96,7 @@ TEST( RedBlackTreeTest, Empty )
 TEST( RedBlackTreeTest, RedBlackTree )
 {
     std::ofstream log( "log.txt" );
-    EXPECT_TRUE( log.is_open() );
+    EXPECT_TRUE( log );
 
     const std::size_t N = 1000;
     const RedBlackTree<int> tree( createRandomTree<int>( 6 * N, log, Generator<int>( N ) ) );
@@ -114,7 +114,7 @@ TEST( RedBlackTreeTest, RedBlackTree )
 TEST( RedBlackTreeTest, Iterators )
 {
     std::ofstream log( "log.txt" );
-    EXPECT_TRUE( log.is_open() );
+    EXPECT_TRUE( log );
 
     const std::size_t N = 1000;
     const RedBlackTree<int> tree( createRandomTree<int>( N, log, Generator<int>( N ) ) );
@@ -129,7 +129,7 @@ TEST( RedBlackTreeTest, Iterators )
 TEST( RedBlackTreeTest, Erase )
 {
     std::ofstream log( "log.txt" );
-    EXPECT_TRUE( log.is_open() );
+    EXPECT_TRUE( log );
 
     const std::size_t N = 1000;
     const RedBlackTree<int> tree( createRandomTree<int>( N, log, Generator<int>( N ) ) );
@@ -138,6 +138,11 @@ TEST( RedBlackTreeTest, Erase )
     EXPECT_TRUE( RedBlackTreeTest::eraseIsValid( tree ) );
 }
 
+TEST( RedBlackTreeTest, Serialize )
+{
+    EXPECT_TRUE( RedBlackTreeTest::serializeIntIsValid() );
+    EXPECT_TRUE( RedBlackTreeTest::serializeStringIsValid() );
+}
 
 TEST( MapTest, Basic )
 {
@@ -148,4 +153,9 @@ TEST( MapTest, Basic )
 TEST( MapTest, Insert )
 {
     EXPECT_TRUE( MapTest::insertTest() );
+}
+
+TEST( MapTest, Serialize )
+{
+    EXPECT_TRUE( MapTest::serializeTest() );
 }

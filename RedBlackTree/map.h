@@ -2,6 +2,26 @@
 
 #include "redblacktree.h"
 
+
+template<typename T1, typename T2>
+rapidjson::Document toJson( const std::pair<T1, T2>& val )
+{
+    rapidjson::Document doc;
+    auto& allocator = doc.GetAllocator();
+
+    doc.SetObject();
+
+    rapidjson::Value jsonValue;
+
+    jsonValue.CopyFrom( toJson( val.first ), allocator );
+    doc.AddMember( "first", jsonValue, allocator );
+
+    jsonValue.CopyFrom( toJson( val.second ), allocator );
+    doc.AddMember( "second", jsonValue, allocator );
+
+    return doc;
+}
+
 template<typename KeyType, typename ValueType, typename Less>
 struct PairComparer
 {

@@ -1,6 +1,22 @@
 #pragma once
 #include "rapidjson/document.h"
 
+template<typename T>
+rapidjson::Value toJson( const T& val )
+{
+    rapidjson::Value jsonValue;
+    jsonValue.Set( val );
+    return jsonValue;
+}
+
+template<typename CharT, typename CharTraits = std::char_traits<CharT>>
+rapidjson::Value toJson( const std::basic_string<CharT, CharTraits>& val )
+{
+    rapidjson::Value jsonValue;
+    jsonValue.SetString( val.c_str(), static_cast<rapidjson::SizeType>( val.size() ) );
+    return jsonValue;
+}
+
 enum class Color : bool
 {
     Red,
@@ -12,14 +28,14 @@ struct Node
 {
 public:
     Node( const T& value,
-        const Color& color,
-        Node* parent = nullptr );
+          const Color& color,
+          Node* parent = nullptr );
 
     std::unique_ptr<Node> copy( Node<T>* parent = nullptr ) const;
 
     bool operator==( const Node<T>& other ) const;
 
-    rapidjson::Document toJson() const;
+    virtual rapidjson::Document toJson() const;
 
 public:
     T value;
@@ -32,8 +48,8 @@ public:
 
 template<typename T>
 inline Node<T>::Node( const T& value,
-    const Color& color,
-    Node* parent )
+                      const Color& color,
+                      Node* parent )
     : value{ value }
     , color{ color }
     , parent{ parent }
@@ -116,7 +132,7 @@ inline rapidjson::Document Node<T>::toJson() const
     doc.SetObject();
 
     rapidjson::Value jsonValue;
-    jsonValue.Set( value );
+    jsonValue.CopyFrom( ::toJson( value ), allocator );
 
     doc.AddMember( "value", jsonValue, allocator );
 

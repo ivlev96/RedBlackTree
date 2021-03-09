@@ -32,6 +32,9 @@ public:
 
     TEST_DECL( eraseIsValid );
 
+    static bool serializeIntIsValid();
+    static bool serializeStringIsValid();
+
 #undef TEST_DECL
 };
 
@@ -237,6 +240,123 @@ TEST_DEF( eraseIsValid )
         }
     }
     return true;
+}
+
+bool RedBlackTreeTest::serializeIntIsValid()
+{
+    RedBlackTree<int> rbt;
+
+    for ( int i = 0; i < 10; ++i )
+    {
+        rbt.insert( i );
+    }
+
+    const std::string test = rbt.serialize();
+
+    const std::string ref = 
+        "{\n"
+        "    \"value\": 3,\n"
+        "    \"color\": \"black\",\n"
+        "    \"left\": {\n"
+        "        \"value\": 1,\n"
+        "        \"color\": \"black\",\n"
+        "        \"left\": {\n"
+        "            \"value\": 0,\n"
+        "            \"color\": \"black\",\n"
+        "            \"left\": null,\n"
+        "            \"right\": null\n"
+        "        },\n"
+        "        \"right\": {\n"
+        "            \"value\": 2,\n"
+        "            \"color\": \"black\",\n"
+        "            \"left\": null,\n"
+        "            \"right\": null\n"
+        "        }\n"
+        "    },\n"
+        "    \"right\": {\n"
+        "        \"value\": 5,\n"
+        "        \"color\": \"black\",\n"
+        "        \"left\": {\n"
+        "            \"value\": 4,\n"
+        "            \"color\": \"black\",\n"
+        "            \"left\": null,\n"
+        "            \"right\": null\n"
+        "        },\n"
+        "        \"right\": {\n"
+        "            \"value\": 7,\n"
+        "            \"color\": \"red\",\n"
+        "            \"left\": {\n"
+        "                \"value\": 6,\n"
+        "                \"color\": \"black\",\n"
+        "                \"left\": null,\n"
+        "                \"right\": null\n"
+        "            },\n"
+        "            \"right\": {\n"
+        "                \"value\": 8,\n"
+        "                \"color\": \"black\",\n"
+        "                \"left\": null,\n"
+        "                \"right\": {\n"
+        "                    \"value\": 9,\n"
+        "                    \"color\": \"red\",\n"
+        "                    \"left\": null,\n"
+        "                    \"right\": null\n"
+        "                }\n"
+        "            }\n"
+        "        }\n"
+        "    }\n"
+        "}";
+
+    return test == ref;
+}
+
+bool RedBlackTreeTest::serializeStringIsValid()
+{
+    RedBlackTree<std::string> rbt
+    {
+        "abba",
+        "bomba",
+        "xyz",
+        "moloko",
+        "puppy",
+        "notice"
+    };
+
+    const std::string test = rbt.serialize();
+    const std::string ref =
+        "{\n"
+        "    \"value\": \"bomba\",\n"
+        "    \"color\": \"black\",\n"
+        "    \"left\": {\n"
+        "        \"value\": \"abba\",\n"
+        "        \"color\": \"black\",\n"
+        "        \"left\": null,\n"
+        "        \"right\": null\n"
+        "    },\n"
+        "    \"right\": {\n"
+        "        \"value\": \"puppy\",\n"
+        "        \"color\": \"red\",\n"
+        "        \"left\": {\n"
+        "            \"value\": \"moloko\",\n"
+        "            \"color\": \"black\",\n"
+        "            \"left\": null,\n"
+        "            \"right\": {\n"
+        "                \"value\": \"notice\",\n"
+        "                \"color\": \"red\",\n"
+        "                \"left\": null,\n"
+        "                \"right\": null\n"
+        "            }\n"
+        "        },\n"
+        "        \"right\": {\n"
+        "            \"value\": \"xyz\",\n"
+        "            \"color\": \"black\",\n"
+        "            \"left\": null,\n"
+        "            \"right\": null\n"
+        "        }\n"
+        "    }\n"
+        "}";
+
+    std::cout << test << std::endl;
+    return test == ref;
 }
 
 #undef TEST_DEF

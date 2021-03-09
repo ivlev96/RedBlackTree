@@ -1,20 +1,13 @@
 #pragma once
-#include "node.h"
-#include "rapidjson/document.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/prettywriter.h"
+#include "IndexedNode.h"
 
 template<typename T, typename Less = std::less<T>>
-class RedBlackTree
+class IndexedRedBlackTree
 {
 private:
     class ConstIterator;
 
 public:
-    friend class RedBlackTreeTest;
-
-    friend rapidjson::Document toJson( const RedBlackTree<T, Less>& rbt );
-
     using value_type = T;
     using reference = T&;
     using const_reference = const T&;
@@ -26,17 +19,17 @@ public:
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 public:
-    RedBlackTree();
-    RedBlackTree( const std::initializer_list<T>& values );
+    IndexedRedBlackTree();
+    IndexedRedBlackTree( const std::initializer_list<T>& values );
 
     template<typename IterType>
-    RedBlackTree( const IterType& begin, const IterType& end );
+    IndexedRedBlackTree( const IterType& begin, const IterType& end );
 
-    RedBlackTree( const RedBlackTree<T, Less>& other );
-    RedBlackTree( RedBlackTree<T, Less>&& other );
+    IndexedRedBlackTree( const IndexedRedBlackTree<T, Less>& other );
+    IndexedRedBlackTree( IndexedRedBlackTree<T, Less>&& other );
 
-    RedBlackTree& operator=( const RedBlackTree<T, Less>& other );
-    RedBlackTree& operator=( RedBlackTree<T, Less>&& other );
+    IndexedRedBlackTree& operator=( const IndexedRedBlackTree<T, Less>& other );
+    IndexedRedBlackTree& operator=( IndexedRedBlackTree<T, Less>&& other );
 
     std::size_t size() const;
 
@@ -44,7 +37,7 @@ public:
 
     void clear();
 
-    bool operator==( const RedBlackTree<T, Less>& other ) const;
+    bool operator==( const IndexedRedBlackTree<T, Less>& other ) const;
 
     iterator begin() const;
     iterator end() const;
@@ -59,31 +52,32 @@ public:
     const_reverse_iterator crend() const;
 
     const_iterator find( const T& value ) const;
+    iterator find( const T& value );
 
     iterator erase( const T& value );
-    iterator erase( const const_iterator& where );
+    iterator erase( const iterator& where );
 
     std::string serialize( bool compact = false ) const;
 
 private:
-    void rotateLeft_( std::unique_ptr<Node<T>>& node );
-    void rotateRight_( std::unique_ptr<Node<T>>& node );
+    void rotateLeft_( std::unique_ptr<IndexedNode<T>>& node );
+    void rotateRight_( std::unique_ptr<IndexedNode<T>>& node );
 
-    Node<T>* insertAsBST_( const T& value );
-    void fixAfterInsert_( Node<T>* insertedNode );
-    void fixAfterErase_( Node<T>* parent, bool removedNodeIsLeft );
+    IndexedNode<T>* insertAsBST_( const T& value );
+    void fixAfterInsert_( IndexedNode<T>* insertedNode );
+    void fixAfterErase_( IndexedNode<T>* parent, bool removedNodeIsLeft );
 
-    std::unique_ptr<Node<T>>& getStorage_( Node<T>& node );
+    std::unique_ptr<IndexedNode<T>>& getStorage_( IndexedNode<T>& node );
 
 private:
     Less m_less;
-    std::unique_ptr<Node<T>> m_root;
+    std::unique_ptr<IndexedNode<T>> m_root;
     std::size_t m_size;
 
 private:
     class ConstIterator
     {
-        friend class RedBlackTree;
+        friend class IndexedRedBlackTree;
     public:
         using difference_type = std::ptrdiff_t;
         using value_type = T;
@@ -93,7 +87,7 @@ private:
         using const_pointer = const T*;
 
     public:
-        ConstIterator( Node<T>* const root, Node<T>* node = nullptr );
+        ConstIterator( IndexedNode<T>* const root, IndexedNode<T>* IndexedNode = nullptr );
         ConstIterator( const ConstIterator& other );
         ConstIterator& operator=( const ConstIterator& other );
 
@@ -112,23 +106,17 @@ private:
         ConstIterator operator--( int );
 
     private:
-        Node<T>* next_( Node<T>* node ) const;
-        Node<T>* prev_( Node<T>* node ) const;
+        IndexedNode<T>* next_( IndexedNode<T>* node ) const;
+        IndexedNode<T>* prev_( IndexedNode<T>* node ) const;
 
     private:
-        Node<T>* m_node;
-        Node<T>* m_root;
+        IndexedNode<T>* m_node;
+        IndexedNode<T>* m_root;
     };
 };
 
 template<typename T, typename Less>
-inline rapidjson::Document toJson( const RedBlackTree<T, Less>& rbt )
-{
-    return rbt.m_root->toJson();
-}
-
-template<typename T, typename Less>
-inline RedBlackTree<T, Less>::RedBlackTree()
+inline IndexedRedBlackTree<T, Less>::IndexedRedBlackTree()
     : m_root{ nullptr }
     , m_less{}
     , m_size{ 0 }
@@ -137,7 +125,7 @@ inline RedBlackTree<T, Less>::RedBlackTree()
 
 template<typename T, typename Less>
 template<typename IterType>
-inline RedBlackTree<T, Less>::RedBlackTree( const IterType& begin, const IterType& end )
+inline IndexedRedBlackTree<T, Less>::IndexedRedBlackTree( const IterType& begin, const IterType& end )
     : m_size{ 0 }
 {
     static_assert( std::is_same_v<decltype( *begin ), T&> || std::is_same_v<decltype( *begin ), const T&> );
@@ -148,14 +136,14 @@ inline RedBlackTree<T, Less>::RedBlackTree( const IterType& begin, const IterTyp
 }
 
 template<typename T, typename Less>
-inline RedBlackTree<T, Less>::RedBlackTree( const std::initializer_list<T>& values )
-    : RedBlackTree( std::cbegin( values ), std::cend( values ) )
+inline IndexedRedBlackTree<T, Less>::IndexedRedBlackTree( const std::initializer_list<T>& values )
+    : IndexedRedBlackTree( std::cbegin( values ), std::cend( values ) )
 {
 }
 
 
 template<typename T, typename Less>
-inline RedBlackTree<T, Less>::RedBlackTree( const RedBlackTree<T, Less>& other )
+inline IndexedRedBlackTree<T, Less>::IndexedRedBlackTree( const IndexedRedBlackTree<T, Less>& other )
     : m_root{ other.m_root->copy() }
     , m_size{ other.m_size }
     , m_less{ other.m_less }
@@ -164,7 +152,7 @@ inline RedBlackTree<T, Less>::RedBlackTree( const RedBlackTree<T, Less>& other )
 }
 
 template<typename T, typename Less>
-inline RedBlackTree<T, Less>::RedBlackTree( RedBlackTree<T, Less>&& other )
+inline IndexedRedBlackTree<T, Less>::IndexedRedBlackTree( IndexedRedBlackTree<T, Less>&& other )
     : m_root{ std::move( other.m_root ) }
     , m_size{ std::move( other.m_size ) }
     , m_less{ std::move( other.m_less ) }
@@ -173,7 +161,7 @@ inline RedBlackTree<T, Less>::RedBlackTree( RedBlackTree<T, Less>&& other )
 }
 
 template<typename T, typename Less>
-inline RedBlackTree<T, Less>& RedBlackTree<T, Less>::operator=( const RedBlackTree<T, Less>& other )
+inline IndexedRedBlackTree<T, Less>& IndexedRedBlackTree<T, Less>::operator=( const IndexedRedBlackTree<T, Less>& other )
 {
     if ( this == &other )
     {
@@ -188,7 +176,7 @@ inline RedBlackTree<T, Less>& RedBlackTree<T, Less>::operator=( const RedBlackTr
 }
 
 template<typename T, typename Less>
-inline RedBlackTree<T, Less>& RedBlackTree<T, Less>::operator=( RedBlackTree<T, Less>&& other )
+inline IndexedRedBlackTree<T, Less>& IndexedRedBlackTree<T, Less>::operator=( IndexedRedBlackTree<T, Less>&& other )
 {
     if ( this == &other )
     {
@@ -204,13 +192,13 @@ inline RedBlackTree<T, Less>& RedBlackTree<T, Less>::operator=( RedBlackTree<T, 
 }
 
 template<typename T, typename Less>
-inline std::size_t RedBlackTree<T, Less>::size() const
+inline std::size_t IndexedRedBlackTree<T, Less>::size() const
 {
     return m_size;
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::const_iterator RedBlackTree<T, Less>::insert( const T& value )
+inline typename IndexedRedBlackTree<T, Less>::const_iterator IndexedRedBlackTree<T, Less>::insert( const T& value )
 {
     auto insertedNode = insertAsBST_( value );
 
@@ -224,14 +212,14 @@ inline typename RedBlackTree<T, Less>::const_iterator RedBlackTree<T, Less>::ins
 }
 
 template<typename T, typename Less>
-inline void RedBlackTree<T, Less>::clear()
+inline void IndexedRedBlackTree<T, Less>::clear()
 {
     m_root.reset();
     m_size = 0;
 }
 
 template<typename T, typename Less>
-inline bool RedBlackTree<T, Less>::operator==( const RedBlackTree<T, Less>& other ) const
+inline bool IndexedRedBlackTree<T, Less>::operator==( const IndexedRedBlackTree<T, Less>& other ) const
 {
     if ( size() != other.size() )
     {
@@ -247,9 +235,9 @@ inline bool RedBlackTree<T, Less>::operator==( const RedBlackTree<T, Less>& othe
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::iterator RedBlackTree<T, Less>::begin() const
+inline typename IndexedRedBlackTree<T, Less>::iterator IndexedRedBlackTree<T, Less>::begin() const
 {
-    Node<T>* current = m_root.get();
+    IndexedNode<T>* current = m_root.get();
     if ( current == nullptr )
     {
         return { m_root.get() };
@@ -264,49 +252,73 @@ inline typename RedBlackTree<T, Less>::iterator RedBlackTree<T, Less>::begin() c
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::iterator RedBlackTree<T, Less>::end() const
+inline typename IndexedRedBlackTree<T, Less>::iterator IndexedRedBlackTree<T, Less>::end() const
 {
     return { m_root.get() };
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::const_iterator RedBlackTree<T, Less>::cbegin() const
+inline typename IndexedRedBlackTree<T, Less>::const_iterator IndexedRedBlackTree<T, Less>::cbegin() const
 {
     return begin();
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::const_iterator RedBlackTree<T, Less>::cend() const
+inline typename IndexedRedBlackTree<T, Less>::const_iterator IndexedRedBlackTree<T, Less>::cend() const
 {
     return end();
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::reverse_iterator RedBlackTree<T, Less>::rbegin() const
+inline typename IndexedRedBlackTree<T, Less>::reverse_iterator IndexedRedBlackTree<T, Less>::rbegin() const
 {
     return end();
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::reverse_iterator RedBlackTree<T, Less>::rend() const
+inline typename IndexedRedBlackTree<T, Less>::reverse_iterator IndexedRedBlackTree<T, Less>::rend() const
 {
     return begin();
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::const_reverse_iterator RedBlackTree<T, Less>::crbegin() const
+inline typename IndexedRedBlackTree<T, Less>::const_reverse_iterator IndexedRedBlackTree<T, Less>::crbegin() const
 {
-    return RedBlackTree<T, Less>::const_reverse_iterator{ cend() };
+    return IndexedRedBlackTree<T, Less>::const_reverse_iterator{ cend() };
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::const_reverse_iterator RedBlackTree<T, Less>::crend() const
+inline typename IndexedRedBlackTree<T, Less>::const_reverse_iterator IndexedRedBlackTree<T, Less>::crend() const
 {
-    return RedBlackTree<T, Less>::const_reverse_iterator{ cbegin() };
+    return IndexedRedBlackTree<T, Less>::const_reverse_iterator{ cbegin() };
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::const_iterator RedBlackTree<T, Less>::find( const T& value ) const
+inline typename IndexedRedBlackTree<T, Less>::const_iterator IndexedRedBlackTree<T, Less>::find( const T& value ) const
+{
+    auto current = m_root.get();
+
+    while ( current != nullptr )
+    {
+        if ( m_less( value, current->value ) )
+        {
+            current = current->left.get();
+        }
+        else if ( m_less( current->value, value ) )
+        {
+            current = current->right.get();
+        }
+        else
+        {
+            return { m_root.get(), current };
+        }
+    }
+    return m_root.get();
+}
+
+
+template<typename T, typename Less /*= std::less<T>*/>
+inline typename IndexedRedBlackTree<T, Less>::iterator IndexedRedBlackTree<T, Less>::find( const T& value )
 {
     auto current = m_root.get();
 
@@ -329,38 +341,57 @@ inline typename RedBlackTree<T, Less>::const_iterator RedBlackTree<T, Less>::fin
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::iterator RedBlackTree<T, Less>::erase( const T& value )
+inline typename IndexedRedBlackTree<T, Less>::iterator IndexedRedBlackTree<T, Less>::erase( const T& value )
 {
     return erase( find( value ) );
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::iterator RedBlackTree<T, Less>::erase( const const_iterator& where )
+inline typename IndexedRedBlackTree<T, Less>::iterator IndexedRedBlackTree<T, Less>::erase( const iterator& where )
 {
     if ( where == end() )
     {
         return end();
     }
     --m_size;
-    auto node = const_cast<Node<T>*>( where.m_node );
+    const auto node = where.m_node;
     iterator next = std::next( where ); //next will be return value
 
     auto current = node;
 
+    {
+        auto parent = node->parent;
+
+        while ( parent )
+        {
+            if ( current == parent->left.get() )
+            {
+                --parent->leftCount;
+            }
+            current = parent;
+            parent = current->parent;
+        }
+
+        current = node;
+    }
+
     if ( node->left != nullptr )
     {
+        --node->leftCount;
         current = node->left.get();
         while ( current->right != nullptr )
         {
             current = current->right.get();
         }
         //current is the rightmost child of left node's child
+
     }
     else if ( node->right != nullptr )
     {
         current = node->right.get();
         while ( current->left != nullptr )
         {
+            --current->leftCount;
             current = current->left.get();
         }
         //current is the leftmost child of right node's child
@@ -384,7 +415,7 @@ inline typename RedBlackTree<T, Less>::iterator RedBlackTree<T, Less>::erase( co
     }
     //current->color == Color::Black
 
-    std::unique_ptr<Node<T>> currentsChildUnique =
+    std::unique_ptr<IndexedNode<T>> currentsChildUnique =
         current->left == nullptr ?
         std::move( current->right ) :
         std::move( current->left );
@@ -408,7 +439,7 @@ inline typename RedBlackTree<T, Less>::iterator RedBlackTree<T, Less>::erase( co
 }
 
 template<typename T, typename Less>
-inline std::string RedBlackTree<T, Less>::serialize( bool compact ) const
+inline std::string IndexedRedBlackTree<T, Less>::serialize( bool compact ) const
 {
     if ( !m_root )
     {
@@ -433,7 +464,7 @@ inline std::string RedBlackTree<T, Less>::serialize( bool compact ) const
 }
 
 template<typename T, typename Less>
-inline void RedBlackTree<T, Less>::rotateLeft_( std::unique_ptr<Node<T>>& node )
+inline void IndexedRedBlackTree<T, Less>::rotateLeft_( std::unique_ptr<IndexedNode<T>>& node )
 {
     ASSERT_NOT_NULL( node->right );
     if ( node->right == nullptr )
@@ -443,13 +474,15 @@ inline void RedBlackTree<T, Less>::rotateLeft_( std::unique_ptr<Node<T>>& node )
 
     node->right->parent = node->parent;
 
-    std::unique_ptr<Node<T>> rightNode = std::move( node->right );
+    std::unique_ptr<IndexedNode<T>> rightNode = std::move( node->right );
 
     node->right = std::move( rightNode->left );
     if ( node->right != nullptr )
     {
         node->right->parent = node.get();
     }
+
+    rightNode->leftCount += node->leftCount + 1;
 
     rightNode->left = std::move( node );
     rightNode->left->parent = rightNode.get();
@@ -459,7 +492,7 @@ inline void RedBlackTree<T, Less>::rotateLeft_( std::unique_ptr<Node<T>>& node )
 
 
 template<typename T, typename Less>
-inline void RedBlackTree<T, Less>::rotateRight_( std::unique_ptr<Node<T>>& node )
+inline void IndexedRedBlackTree<T, Less>::rotateRight_( std::unique_ptr<IndexedNode<T>>& node )
 {
     ASSERT_NOT_NULL( node->left );
     if ( node->left == nullptr )
@@ -468,13 +501,15 @@ inline void RedBlackTree<T, Less>::rotateRight_( std::unique_ptr<Node<T>>& node 
     }
 
     node->left->parent = node->parent;
-    std::unique_ptr<Node<T>> leftNode = std::move( node->left );
+    std::unique_ptr<IndexedNode<T>> leftNode = std::move( node->left );
 
     node->left = std::move( leftNode->right );
     if ( node->left != nullptr )
     {
         node->left->parent = node.get();
     }
+
+    node->leftCount -= leftNode->leftCount + 1;
 
     leftNode->right = std::move( node );
     leftNode->right->parent = leftNode.get();
@@ -483,11 +518,11 @@ inline void RedBlackTree<T, Less>::rotateRight_( std::unique_ptr<Node<T>>& node 
 }
 
 template<typename T, typename Less>
-inline Node<T>* RedBlackTree<T, Less>::insertAsBST_( const T& value )
+inline IndexedNode<T>* IndexedRedBlackTree<T, Less>::insertAsBST_( const T& value )
 {
     if ( m_root == nullptr )
     {
-        m_root = std::make_unique<Node<T>>( value, Color::Black );
+        m_root = std::make_unique<IndexedNode<T>>( value, Color::Black );
         return m_root.get();
     }
 
@@ -496,9 +531,10 @@ inline Node<T>* RedBlackTree<T, Less>::insertAsBST_( const T& value )
     {
         if ( m_less( value, current->value ) )
         {
+            ++current->leftCount;
             if ( current->left == nullptr )
             {
-                current->left = std::make_unique<Node<T>>( value, Color::Red, current );
+                current->left = std::make_unique<IndexedNode<T>>( value, Color::Red, current );
                 current = current->left.get();
                 break;
             }
@@ -511,7 +547,7 @@ inline Node<T>* RedBlackTree<T, Less>::insertAsBST_( const T& value )
         {
             if ( current->right == nullptr )
             {
-                current->right = std::make_unique<Node<T>>( value, Color::Red, current );
+                current->right = std::make_unique<IndexedNode<T>>( value, Color::Red, current );
                 current = current->right.get();
                 break;
             }
@@ -530,7 +566,7 @@ inline Node<T>* RedBlackTree<T, Less>::insertAsBST_( const T& value )
 }
 
 template<typename T, typename Less>
-inline void RedBlackTree<T, Less>::fixAfterInsert_( Node<T>* insertedNode )
+inline void IndexedRedBlackTree<T, Less>::fixAfterInsert_( IndexedNode<T>* insertedNode )
 {
     if ( insertedNode->parent == nullptr )
     {
@@ -613,7 +649,7 @@ inline void RedBlackTree<T, Less>::fixAfterInsert_( Node<T>* insertedNode )
 }
 
 template<typename T, typename Less>
-inline void RedBlackTree<T, Less>::fixAfterErase_( Node<T>* parent, bool removedNodeIsLeft )
+inline void IndexedRedBlackTree<T, Less>::fixAfterErase_( IndexedNode<T>* parent, bool removedNodeIsLeft )
 {
     if ( parent == nullptr )
     {
@@ -724,7 +760,7 @@ inline void RedBlackTree<T, Less>::fixAfterErase_( Node<T>* parent, bool removed
 }
 
 template<typename T, typename Less>
-inline std::unique_ptr<Node<T>>& RedBlackTree<T, Less>::getStorage_( Node<T>& node )
+inline std::unique_ptr<IndexedNode<T>>& IndexedRedBlackTree<T, Less>::getStorage_( IndexedNode<T>& node )
 {
     if ( node.parent == nullptr )
     {
@@ -740,7 +776,7 @@ inline std::unique_ptr<Node<T>>& RedBlackTree<T, Less>::getStorage_( Node<T>& no
 }
 
 template<typename T, typename Less>
-inline RedBlackTree<T, Less>::ConstIterator::ConstIterator( Node<T>* const root, Node<T>* node )
+inline IndexedRedBlackTree<T, Less>::ConstIterator::ConstIterator( IndexedNode<T>* const root, IndexedNode<T>* node )
     : m_root( root )
     , m_node( node )
 {
@@ -748,14 +784,14 @@ inline RedBlackTree<T, Less>::ConstIterator::ConstIterator( Node<T>* const root,
 }
 
 template<typename T, typename Less>
-inline RedBlackTree<T, Less>::ConstIterator::ConstIterator( const ConstIterator& other )
+inline IndexedRedBlackTree<T, Less>::ConstIterator::ConstIterator( const ConstIterator& other )
     : m_root( other.m_root )
     , m_node( other.m_node )
 {
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::ConstIterator& RedBlackTree<T, Less>::ConstIterator::operator=( const ConstIterator& other )
+inline typename IndexedRedBlackTree<T, Less>::ConstIterator& IndexedRedBlackTree<T, Less>::ConstIterator::operator=( const ConstIterator& other )
 {
     m_root = other.m_root;
     m_node = other.m_node;
@@ -764,7 +800,7 @@ inline typename RedBlackTree<T, Less>::ConstIterator& RedBlackTree<T, Less>::Con
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::ConstIterator::value_type RedBlackTree<T, Less>::ConstIterator::operator*() const
+inline typename IndexedRedBlackTree<T, Less>::ConstIterator::value_type IndexedRedBlackTree<T, Less>::ConstIterator::operator*() const
 {
     if ( m_node == nullptr )
     {
@@ -774,7 +810,7 @@ inline typename RedBlackTree<T, Less>::ConstIterator::value_type RedBlackTree<T,
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::ConstIterator::reference RedBlackTree<T, Less>::ConstIterator::operator*()
+inline typename IndexedRedBlackTree<T, Less>::ConstIterator::reference IndexedRedBlackTree<T, Less>::ConstIterator::operator*()
 {
     if ( m_node == nullptr )
     {
@@ -784,7 +820,7 @@ inline typename RedBlackTree<T, Less>::ConstIterator::reference RedBlackTree<T, 
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::ConstIterator::const_pointer RedBlackTree<T, Less>::ConstIterator::operator->() const
+inline typename IndexedRedBlackTree<T, Less>::ConstIterator::const_pointer IndexedRedBlackTree<T, Less>::ConstIterator::operator->() const
 {
     if ( m_node == nullptr )
     {
@@ -794,7 +830,7 @@ inline typename RedBlackTree<T, Less>::ConstIterator::const_pointer RedBlackTree
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::ConstIterator::pointer RedBlackTree<T, Less>::ConstIterator::operator->()
+inline typename IndexedRedBlackTree<T, Less>::ConstIterator::pointer IndexedRedBlackTree<T, Less>::ConstIterator::operator->()
 {
     if ( m_node == nullptr )
     {
@@ -804,26 +840,26 @@ inline typename RedBlackTree<T, Less>::ConstIterator::pointer RedBlackTree<T, Le
 }
 
 template<typename T, typename Less>
-inline bool RedBlackTree<T, Less>::ConstIterator::operator==( const RedBlackTree<T, Less>::ConstIterator& other ) const
+inline bool IndexedRedBlackTree<T, Less>::ConstIterator::operator==( const IndexedRedBlackTree<T, Less>::ConstIterator& other ) const
 {
     return m_root == other.m_root && m_node == other.m_node;
 }
 
 template<typename T, typename Less>
-inline bool RedBlackTree<T, Less>::ConstIterator::operator!=( const RedBlackTree<T, Less>::ConstIterator& other ) const
+inline bool IndexedRedBlackTree<T, Less>::ConstIterator::operator!=( const IndexedRedBlackTree<T, Less>::ConstIterator& other ) const
 {
     return !( *this == other );
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::ConstIterator& RedBlackTree<T, Less>::ConstIterator::operator++()
+inline typename IndexedRedBlackTree<T, Less>::ConstIterator& IndexedRedBlackTree<T, Less>::ConstIterator::operator++()
 {
     m_node = next_( m_node );
     return *this;
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::ConstIterator RedBlackTree<T, Less>::ConstIterator::operator++( int )
+inline typename IndexedRedBlackTree<T, Less>::ConstIterator IndexedRedBlackTree<T, Less>::ConstIterator::operator++( int )
 {
     auto copy = *this;
     m_node = next_( m_node );
@@ -831,14 +867,14 @@ inline typename RedBlackTree<T, Less>::ConstIterator RedBlackTree<T, Less>::Cons
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::ConstIterator& RedBlackTree<T, Less>::ConstIterator::operator--()
+inline typename IndexedRedBlackTree<T, Less>::ConstIterator& IndexedRedBlackTree<T, Less>::ConstIterator::operator--()
 {
     m_node = prev_( m_node );
     return *this;
 }
 
 template<typename T, typename Less>
-inline typename RedBlackTree<T, Less>::ConstIterator RedBlackTree<T, Less>::ConstIterator::operator--( int )
+inline typename IndexedRedBlackTree<T, Less>::ConstIterator IndexedRedBlackTree<T, Less>::ConstIterator::operator--( int )
 {
     auto copy = *this;
     m_node = prev_( m_node );
@@ -846,9 +882,9 @@ inline typename RedBlackTree<T, Less>::ConstIterator RedBlackTree<T, Less>::Cons
 }
 
 template<typename T, typename Less>
-inline Node<T>* RedBlackTree<T, Less>::ConstIterator::next_( Node<T>* node ) const
+inline IndexedNode<T>* IndexedRedBlackTree<T, Less>::ConstIterator::next_( IndexedNode<T>* node ) const
 {
-    Node<T>* nextNode = nullptr;
+    IndexedNode<T>* nextNode = nullptr;
 
     if ( node == nullptr )
     {
@@ -887,9 +923,9 @@ inline Node<T>* RedBlackTree<T, Less>::ConstIterator::next_( Node<T>* node ) con
 }
 
 template<typename T, typename Less>
-inline Node<T>* RedBlackTree<T, Less>::ConstIterator::prev_( Node<T>* node ) const
+inline IndexedNode<T>* IndexedRedBlackTree<T, Less>::ConstIterator::prev_( IndexedNode<T>* node ) const
 {
-    Node<T>* nextNode = nullptr;
+    IndexedNode<T>* nextNode = nullptr;
 
     if ( node == nullptr )
     {

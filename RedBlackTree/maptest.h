@@ -10,6 +10,7 @@ public:
 
     TEST_DECL( basicTest );
     TEST_DECL( insertTest );
+    TEST_DECL( serializeTest );
 
 #undef TEST_DECL
 };
@@ -50,6 +51,47 @@ TEST_DEF( insertTest )
         { "2"s, 2 },
         { "3"s, 3 }
     };
+
+    return test == ref;
+}
+
+TEST_DEF( serializeTest )
+{
+    Map<std::string, int> map;
+
+    map["One"] = map["Two"] = map["Three"] = 1;
+    map["Two"]++;
+    ++map["Three"];
+    ++map["Three"];
+
+    const std::string test = map.serialize();
+
+    const std::string ref =
+    "{\n"
+    "    \"value\": {\n"
+    "        \"first\": \"Three\",\n"
+    "        \"second\": 3\n"
+    "    },\n"
+    "    \"color\": \"black\",\n"
+    "    \"left\": {\n"
+    "        \"value\": {\n"
+    "            \"first\": \"One\",\n"
+    "            \"second\": 1\n"
+    "        },\n"
+    "        \"color\": \"red\",\n"
+    "        \"left\": null,\n"
+    "        \"right\": null\n"
+    "    },\n"
+    "    \"right\": {\n"
+    "        \"value\": {\n"
+    "            \"first\": \"Two\",\n"
+    "            \"second\": 2\n"
+    "        },\n"
+    "        \"color\": \"red\",\n"
+    "        \"left\": null,\n"
+    "        \"right\": null\n"
+    "    }\n"
+    "}";
 
     return test == ref;
 }

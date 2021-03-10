@@ -1,13 +1,13 @@
 #pragma once
 #include "redblacktree.h"
 
-class RedBlackTreeTest
+class IndexedRedBlackTreeTest
 {
 public:
 
 #define TEST_DECL(testName) \
 	template<typename T, typename Less = std::less<T>> \
-	static bool testName( const RedBlackTree<T, Less>& tree )
+	static bool testName(const IndexedRedBlackTree<T, Less>& tree)
 
     TEST_DECL( copyConstructorIsValid );
     TEST_DECL( moveConstructorIsValid );
@@ -32,6 +32,8 @@ public:
 
     TEST_DECL( eraseIsValid );
 
+    TEST_DECL( leftCountsAreValid );
+
     static bool serializeIntIsValid();
     static bool serializeStringIsValid();
 
@@ -40,18 +42,18 @@ public:
 
 #define TEST_DEF(testName) \
 template<typename T, typename Less> \
-inline bool RedBlackTreeTest::testName(const RedBlackTree<T, Less>& tree)
+inline bool IndexedRedBlackTreeTest::testName(const IndexedRedBlackTree<T, Less>& tree)
 
 TEST_DEF( copyConstructorIsValid )
 {
-    RedBlackTree<T, Less> copy( tree );
+    IndexedRedBlackTree<T, Less> copy( tree );
     return isRedBlackTree( copy ) && tree == copy;
 }
 
 TEST_DEF( moveConstructorIsValid )
 {
-    RedBlackTree<T, Less> copyTree( tree );
-    RedBlackTree<T, Less> moveTree( std::move( copyTree ) );
+    IndexedRedBlackTree<T, Less> copyTree( tree );
+    IndexedRedBlackTree<T, Less> moveTree( std::move( copyTree ) );
 
     return copyTree.size() == 0 && copyTree.m_root == nullptr &&
         isRedBlackTree( moveTree ) && tree == moveTree;
@@ -59,15 +61,15 @@ TEST_DEF( moveConstructorIsValid )
 
 TEST_DEF( copyAssignmentIsValid )
 {
-    RedBlackTree<T, Less> copy;
+    IndexedRedBlackTree<T, Less> copy;
     copy = tree;
     return isRedBlackTree( copy ) && tree == copy;
 }
 
 TEST_DEF( moveAssignmentIsValid )
 {
-    RedBlackTree<T, Less> copyTree( tree );
-    RedBlackTree<T, Less> moveTree;
+    IndexedRedBlackTree<T, Less> copyTree( tree );
+    IndexedRedBlackTree<T, Less> moveTree;
 
     moveTree = std::move( copyTree );
 
@@ -81,7 +83,7 @@ TEST_DEF( isEmpty )
 }
 
 template<typename T, typename Less>
-inline bool isBinarySearchTreeImpl( const Node<T>* node, const Less& less )
+inline bool isBinarySearchTreeImpl( const IndexedNode<T>* node, const Less& less )
 {
     if ( node == nullptr )
     {
@@ -104,7 +106,7 @@ TEST_DEF( isBinarySearchTree )
 }
 
 template<typename T>
-bool allPointersAreValidImpl( const Node<T>* node )
+bool allPointersAreValidImpl( const IndexedNode<T>* node )
 {
     if ( node == nullptr )
     {
@@ -129,7 +131,7 @@ TEST_DEF( rootIsBlack )
 }
 
 template<typename T>
-bool bothChildrenOfRedAreBlackImpl( const Node<T>* node )
+bool bothChildrenOfRedAreBlackImpl( const IndexedNode<T>* node )
 {
     if ( node == nullptr )
     {
@@ -150,7 +152,7 @@ TEST_DEF( bothChildrenOfRedAreBlack )
 }
 
 template<typename T>
-std::pair<bool, std::size_t> blackLengthIsCorrectForEveryNodeImpl( const Node<T>* node, std::size_t blackLength )
+std::pair<bool, std::size_t> blackLengthIsCorrectForEveryNodeImpl( const IndexedNode<T>* node, std::size_t blackLength )
 {
     if ( node == nullptr )
     {
@@ -226,7 +228,7 @@ TEST_DEF( eraseIsValid )
 
     std::shuffle( values.begin(), values.end(), generator );
 
-    RedBlackTree<T, Less> copyTree( tree );
+    IndexedRedBlackTree<T, Less> copyTree( tree );
     std::size_t size = copyTree.size();
 
     for ( int value : values )
@@ -242,9 +244,38 @@ TEST_DEF( eraseIsValid )
     return true;
 }
 
-bool RedBlackTreeTest::serializeIntIsValid()
+namespace
 {
-    RedBlackTree<int> rbt;
+template<typename T>
+static std::size_t sChildCount( const IndexedNode<T>* node )
+{
+    if ( !node )
+    {
+        return 0;
+    }
+
+    return ( node->left != nullptr ) + ( node->right != nullptr ) +
+        sChildCount( node->left.get() ) + sChildCount( node->right.get() );
+}
+}
+
+TEST_DEF( leftCountsAreValid )
+{
+    for ( auto it = tree.cbegin(); it != tree.cend(); ++it )
+    {
+        auto node = it.m_node;
+        if ( node->leftCount != sChildCount( node->left.get() ) + ( node->left != nullptr ) )
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool IndexedRedBlackTreeTest::serializeIntIsValid()
+{
+    IndexedRedBlackTree<int> rbt;
 
     for ( int i = 0; i < 10; ++i )
     {
@@ -257,18 +288,22 @@ bool RedBlackTreeTest::serializeIntIsValid()
         "{\n"
         "    \"value\": 3,\n"
         "    \"color\": \"black\",\n"
+        "    \"leftCount\": 3,\n"
         "    \"left\": {\n"
         "        \"value\": 1,\n"
         "        \"color\": \"black\",\n"
+        "        \"leftCount\": 1,\n"
         "        \"left\": {\n"
         "            \"value\": 0,\n"
         "            \"color\": \"black\",\n"
+        "            \"leftCount\": 0,\n"
         "            \"left\": null,\n"
         "            \"right\": null\n"
         "        },\n"
         "        \"right\": {\n"
         "            \"value\": 2,\n"
         "            \"color\": \"black\",\n"
+        "            \"leftCount\": 0,\n"
         "            \"left\": null,\n"
         "            \"right\": null\n"
         "        }\n"
@@ -276,28 +311,34 @@ bool RedBlackTreeTest::serializeIntIsValid()
         "    \"right\": {\n"
         "        \"value\": 5,\n"
         "        \"color\": \"black\",\n"
+        "        \"leftCount\": 1,\n"
         "        \"left\": {\n"
         "            \"value\": 4,\n"
         "            \"color\": \"black\",\n"
+        "            \"leftCount\": 0,\n"
         "            \"left\": null,\n"
         "            \"right\": null\n"
         "        },\n"
         "        \"right\": {\n"
         "            \"value\": 7,\n"
         "            \"color\": \"red\",\n"
+        "            \"leftCount\": 1,\n"
         "            \"left\": {\n"
         "                \"value\": 6,\n"
         "                \"color\": \"black\",\n"
+        "                \"leftCount\": 0,\n"
         "                \"left\": null,\n"
         "                \"right\": null\n"
         "            },\n"
         "            \"right\": {\n"
         "                \"value\": 8,\n"
         "                \"color\": \"black\",\n"
+        "                \"leftCount\": 0,\n"
         "                \"left\": null,\n"
         "                \"right\": {\n"
         "                    \"value\": 9,\n"
         "                    \"color\": \"red\",\n"
+        "                    \"leftCount\": 0,\n"
         "                    \"left\": null,\n"
         "                    \"right\": null\n"
         "                }\n"
@@ -309,9 +350,9 @@ bool RedBlackTreeTest::serializeIntIsValid()
     return test == ref;
 }
 
-bool RedBlackTreeTest::serializeStringIsValid()
+bool IndexedRedBlackTreeTest::serializeStringIsValid()
 {
-    RedBlackTree<std::string> rbt
+    IndexedRedBlackTree<std::string> rbt
     {
         "abba",
         "bomba",
@@ -326,22 +367,27 @@ bool RedBlackTreeTest::serializeStringIsValid()
         "{\n"
         "    \"value\": \"bomba\",\n"
         "    \"color\": \"black\",\n"
+        "    \"leftCount\": 1,\n"
         "    \"left\": {\n"
         "        \"value\": \"abba\",\n"
         "        \"color\": \"black\",\n"
+        "        \"leftCount\": 0,\n"
         "        \"left\": null,\n"
         "        \"right\": null\n"
         "    },\n"
         "    \"right\": {\n"
         "        \"value\": \"puppy\",\n"
         "        \"color\": \"red\",\n"
+        "        \"leftCount\": 2,\n"
         "        \"left\": {\n"
         "            \"value\": \"moloko\",\n"
         "            \"color\": \"black\",\n"
+        "            \"leftCount\": 0,\n"
         "            \"left\": null,\n"
         "            \"right\": {\n"
         "                \"value\": \"notice\",\n"
         "                \"color\": \"red\",\n"
+        "                \"leftCount\": 0,\n"
         "                \"left\": null,\n"
         "                \"right\": null\n"
         "            }\n"
@@ -349,6 +395,7 @@ bool RedBlackTreeTest::serializeStringIsValid()
         "        \"right\": {\n"
         "            \"value\": \"xyz\",\n"
         "            \"color\": \"black\",\n"
+        "            \"leftCount\": 0,\n"
         "            \"left\": null,\n"
         "            \"right\": null\n"
         "        }\n"

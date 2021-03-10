@@ -23,53 +23,57 @@ enum class Color : bool
     Black
 };
 
-template<typename T>
-struct Node
+template<typename T, bool IsIndexed>
+struct NodeBase
 {
 public:
-    Node( const T& value,
-          const Color& color,
-          Node* parent = nullptr );
+    static constexpr std::size_t isIndexed = IsIndexed;
 
-    std::unique_ptr<Node> copy( Node<T>* parent = nullptr ) const;
+    NodeBase( const T& value,
+              const Color& color,
+              NodeBase* parent = nullptr );
 
-    bool operator==( const Node<T>& other ) const;
+    std::unique_ptr<NodeBase> copy( NodeBase* parent = nullptr ) const;
+
+    bool operator==( const NodeBase<T, IsIndexed>& other ) const;
 
     virtual rapidjson::Document toJson() const;
 
 public:
     T value;
     Color color;
+    std::size_t leftCount;
 
-    std::unique_ptr<Node> left;
-    std::unique_ptr<Node> right;
-    Node* parent;
+    std::unique_ptr<NodeBase> left;
+    std::unique_ptr<NodeBase> right;
+    NodeBase* parent;
 };
 
-template<typename T>
-inline Node<T>::Node( const T& value,
-                      const Color& color,
-                      Node* parent )
+template<typename T, bool IsIndexed>
+inline NodeBase<T, IsIndexed>::NodeBase( const T& value,
+                                         const Color& color,
+                                         NodeBase* parent )
     : value{ value }
     , color{ color }
+    , leftCount{ 0 }
     , parent{ parent }
     , left{ nullptr }
     , right{ nullptr }
 {
 }
 
-template<typename T>
-inline std::unique_ptr<Node<T>> Node<T>::copy( Node<T>* parentNode ) const
+template<typename T, bool IsIndexed>
+inline std::unique_ptr<NodeBase<T, IsIndexed>> NodeBase<T, IsIndexed>::copy( NodeBase* parentNode ) const
 {
-    auto copyOfThis = std::make_unique<Node<T>>( value, color, parentNode );
+    auto copyOfThis = std::make_unique<NodeBase>( value, color, parentNode );
     copyOfThis->left = left == nullptr ? nullptr : left->copy( copyOfThis.get() );
     copyOfThis->right = right == nullptr ? nullptr : right->copy( copyOfThis.get() );
 
     return copyOfThis;
 }
 
-template<typename T>
-inline bool Node<T>::operator==( const Node<T>& other ) const
+template<typename T, bool IsIndexed>
+inline bool NodeBase<T, IsIndexed>::operator==( const NodeBase& other ) const
 {
     if ( value != other.value )
     {
@@ -123,8 +127,8 @@ inline bool Node<T>::operator==( const Node<T>& other ) const
     return equal;
 }
 
-template<typename T>
-inline rapidjson::Document Node<T>::toJson() const
+template<typename T, bool IsIndexed>
+inline rapidjson::Document NodeBase<T, IsIndexed>::toJson() const
 {
     rapidjson::Document doc;
     auto& allocator = doc.GetAllocator();
@@ -138,6 +142,12 @@ inline rapidjson::Document Node<T>::toJson() const
 
     jsonValue.SetString( color == Color::Red ? "red" : "black", allocator );
     doc.AddMember( "color", jsonValue, allocator );
+
+    if constexpr ( isIndexed )
+    {
+        jsonValue.Set( leftCount );
+        doc.AddMember( "leftCount", jsonValue, allocator );
+    }
 
     if ( left != nullptr )
     {
@@ -162,3 +172,9 @@ inline rapidjson::Document Node<T>::toJson() const
     doc.AddMember( "right", jsonValue, allocator );
     return doc;
 }
+
+template<typename T>
+using Node = NodeBase<T, false>;
+
+template<typename T>
+using IndexedNode = NodeBase<T, true>;

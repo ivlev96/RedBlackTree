@@ -33,10 +33,7 @@
     <ClInclude Include="maptest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="indexedredblacktree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="indexednode.h">
+    <ClInclude Include="indexedredblacktreetest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

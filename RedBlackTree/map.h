@@ -36,6 +36,7 @@ struct PairComparer
 template<typename KeyType, typename ValueType, typename Less = std::less<const KeyType>>
 class Map : public RedBlackTree<std::pair<const KeyType, ValueType>, PairComparer<KeyType, ValueType, Less>>
 {
+    using RedBlackTreeParent = RedBlackTree<std::pair<const KeyType, ValueType>, PairComparer<KeyType, ValueType, Less>>;
 public:
     Map();
     Map( const std::initializer_list<std::pair<const KeyType, ValueType>>& values );
@@ -73,7 +74,7 @@ bool Map<KeyType, ValueType, Less>::operator==( const Map& other ) const
 
 template<typename KeyType, typename ValueType, typename Less>
 inline Map<KeyType, ValueType, Less>::Map()
-    : RedBlackTree()
+    : RedBlackTreeParent()
 {
 }
 
@@ -86,7 +87,7 @@ inline Map<KeyType, ValueType, Less>::Map( const std::initializer_list<std::pair
 template<typename KeyType, typename ValueType, typename Less>
 template<typename IterType>
 inline Map<KeyType, ValueType, Less>::Map( const IterType& begin, const IterType& end )
-    : RedBlackTree( begin, end )
+    : RedBlackTreeParent( begin, end )
 {
 }
 

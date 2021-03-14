@@ -49,6 +49,7 @@ public:
     void clear();
 
     bool operator==( const RedBlackTreeBase& other ) const;
+    bool operator!=( const RedBlackTreeBase& other ) const;
 
     iterator begin() const;
     iterator end() const;
@@ -67,6 +68,19 @@ public:
 
     iterator erase( const T& value );
     iterator erase( const iterator& where );
+
+    template<typename = std::enable_if_t<isIndexed>>
+    iterator findByIndex( size_type i );
+    template<typename = std::enable_if_t<isIndexed>>
+    const_iterator findByIndex( size_type i ) const;
+
+    template<typename = std::enable_if_t<isIndexed>>
+    T& getByIndex( size_type i );
+    template<typename = std::enable_if_t<isIndexed>>
+    const T& getByIndex( size_type i ) const;
+
+    template<typename = std::enable_if_t<isIndexed>>
+    iterator eraseByIndex( size_type i );
 
     std::string serialize( bool compact = false ) const;
 
@@ -256,6 +270,13 @@ inline bool RedBlackTreeBase<T, IsIndexed, Less>::operator==( const RedBlackTree
 
     return *m_root == *other.m_root;
 }
+
+template<typename T, bool IsIndexed, typename Less>
+inline bool RedBlackTreeBase<T, IsIndexed, Less>::operator!=( const RedBlackTreeBase& other ) const
+{
+    return !( *this == other );
+}
+
 
 template<typename T, bool IsIndexed, typename Less>
 inline typename RedBlackTreeBase<T, IsIndexed, Less>::iterator
@@ -461,7 +482,78 @@ inline typename RedBlackTreeBase<T, IsIndexed, Less>::iterator
     currentUnique.reset();
 
     fixAfterErase_( currentsParent, removedNodeIsLeft );
+    if ( !m_root ) // if removed the last element of container - root
+    {
+        ASSERT( m_size == 0 );
+        next = end();
+    }
     return next;
+}
+
+template<typename T, bool IsIndexed, typename Less>
+template<typename /*= std::enable_if_t<isIndexed>*/>
+inline typename RedBlackTreeBase<T, IsIndexed, Less>::const_iterator
+RedBlackTreeBase<T, IsIndexed, Less>::findByIndex( size_type i ) const
+{
+    return const_cast<RedBlackTreeBase<T, IsIndexed, Less>*>( this )->findByIndex( i );
+}
+
+template<typename T, bool IsIndexed, typename Less>
+template<typename /*= std::enable_if_t<isIndexed>*/>
+inline typename RedBlackTreeBase<T, IsIndexed, Less>::iterator
+    RedBlackTreeBase<T, IsIndexed, Less>::findByIndex( size_type i )
+{
+    // static_assert to forbid findByIndex<void> hack
+    static_assert( isIndexed, "findByIndex available only if IsIndexed == true" );
+
+    if ( i >= m_size )
+    {
+        throw std::out_of_range( "Invalid index" );
+    }
+
+    auto node = m_root.get();
+
+    while ( node )
+    {
+        if ( i == node->leftCount )
+        {
+            return { m_root.get(), node };
+        }
+
+        if ( i < node->leftCount )
+        {
+            node = node->left.get();
+        }
+        else //if ( i > node->leftCount )
+        {
+            i -= node->leftCount + 1;
+            node = node->right.get();
+        }
+    }
+
+    throw std::logic_error( "Invalid Red-Black tree structure" );
+}
+
+template<typename T, bool IsIndexed, typename Less>
+template<typename /*= std::enable_if_t<isIndexed>*/>
+inline const T& RedBlackTreeBase<T, IsIndexed, Less>::getByIndex( size_type i ) const
+{
+    return const_cast<RedBlackTreeBase<T, IsIndexed, Less>*>( this )->getByIndex( i );
+}
+
+template<typename T, bool IsIndexed, typename Less>
+template<typename /*= std::enable_if_t<isIndexed>*/>
+inline T& RedBlackTreeBase<T, IsIndexed, Less>::getByIndex( size_type i )
+{
+    return *findByIndex( i );
+}
+
+template<typename T, bool IsIndexed, typename Less>
+template<typename /*= std::enable_if_t<isIndexed>*/>
+inline typename RedBlackTreeBase<T, IsIndexed, Less>::iterator
+    RedBlackTreeBase<T, IsIndexed, Less>::eraseByIndex( size_type i )
+{
+    return erase( findByIndex( i ) );
 }
 
 template<typename T, bool IsIndexed, typename Less>

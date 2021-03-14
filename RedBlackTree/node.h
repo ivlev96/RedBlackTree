@@ -35,7 +35,7 @@ public:
 
     std::unique_ptr<NodeBase> copy( NodeBase* parent = nullptr ) const;
 
-    bool operator==( const NodeBase<T, IsIndexed>& other ) const;
+    bool operator==( const NodeBase& other ) const;
 
     virtual rapidjson::Document toJson() const;
 
@@ -55,17 +55,24 @@ inline NodeBase<T, IsIndexed>::NodeBase( const T& value,
                                          NodeBase* parent )
     : value{ value }
     , color{ color }
-    , leftCount{ 0 }
     , parent{ parent }
     , left{ nullptr }
     , right{ nullptr }
 {
+    if constexpr ( isIndexed )
+    {
+        leftCount = 0;
+    }
 }
 
 template<typename T, bool IsIndexed>
 inline std::unique_ptr<NodeBase<T, IsIndexed>> NodeBase<T, IsIndexed>::copy( NodeBase* parentNode ) const
 {
     auto copyOfThis = std::make_unique<NodeBase>( value, color, parentNode );
+    if constexpr ( isIndexed )
+    {
+        copyOfThis->leftCount = leftCount;
+    }
     copyOfThis->left = left == nullptr ? nullptr : left->copy( copyOfThis.get() );
     copyOfThis->right = right == nullptr ? nullptr : right->copy( copyOfThis.get() );
 
@@ -75,6 +82,14 @@ inline std::unique_ptr<NodeBase<T, IsIndexed>> NodeBase<T, IsIndexed>::copy( Nod
 template<typename T, bool IsIndexed>
 inline bool NodeBase<T, IsIndexed>::operator==( const NodeBase& other ) const
 {
+    if constexpr ( isIndexed )
+    {
+        if ( leftCount != other.leftCount )
+        {
+            return false;
+        }
+    }
+
     if ( value != other.value )
     {
         return false;

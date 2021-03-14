@@ -6,8 +6,8 @@ class IndexedRedBlackTreeTest
 public:
 
 #define TEST_DECL(testName) \
-	template<typename T, typename Less = std::less<T>> \
-	static bool testName(const IndexedRedBlackTree<T, Less>& tree)
+    template<typename T, typename Less = std::less<T>> \
+    static bool testName(const IndexedRedBlackTree<T, Less>& tree)
 
     TEST_DECL( copyConstructorIsValid );
     TEST_DECL( moveConstructorIsValid );
@@ -33,6 +33,12 @@ public:
     TEST_DECL( eraseIsValid );
 
     TEST_DECL( leftCountsAreValid );
+
+    TEST_DECL( getByIndexIsValid );
+    TEST_DECL( findByIndexIsValid );
+
+    static bool IndexedRedBlackTreeTest::eraseByIndex0IsValid( IndexedRedBlackTree<std::size_t>& tree );
+    static bool IndexedRedBlackTreeTest::eraseByIndexIsValid( IndexedRedBlackTree<std::size_t>& tree, size_t i );
 
     static bool serializeIntIsValid();
     static bool serializeStringIsValid();
@@ -106,7 +112,7 @@ TEST_DEF( isBinarySearchTree )
 }
 
 template<typename T>
-bool allPointersAreValidImpl( const IndexedNode<T>* node )
+inline bool allPointersAreValidImpl( const IndexedNode<T>* node )
 {
     if ( node == nullptr )
     {
@@ -131,7 +137,7 @@ TEST_DEF( rootIsBlack )
 }
 
 template<typename T>
-bool bothChildrenOfRedAreBlackImpl( const IndexedNode<T>* node )
+inline bool bothChildrenOfRedAreBlackImpl( const IndexedNode<T>* node )
 {
     if ( node == nullptr )
     {
@@ -140,7 +146,7 @@ bool bothChildrenOfRedAreBlackImpl( const IndexedNode<T>* node )
 
     return
         ( node->color == Color::Black ||
-            ( node->left == nullptr || node->left->color == Color::Black ) &&
+            ( node->left == nullptr || node->left->color == Color::Black ) && //-V648
             ( node->right == nullptr || node->right->color == Color::Black ) ) &&
         bothChildrenOfRedAreBlackImpl( node->left.get() ) &&
         bothChildrenOfRedAreBlackImpl( node->right.get() );
@@ -152,7 +158,7 @@ TEST_DEF( bothChildrenOfRedAreBlack )
 }
 
 template<typename T>
-std::pair<bool, std::size_t> blackLengthIsCorrectForEveryNodeImpl( const IndexedNode<T>* node, std::size_t blackLength )
+inline std::pair<bool, std::size_t> blackLengthIsCorrectForEveryNodeImpl( const IndexedNode<T>* node, std::size_t blackLength )
 {
     if ( node == nullptr )
     {
@@ -247,7 +253,7 @@ TEST_DEF( eraseIsValid )
 namespace
 {
 template<typename T>
-static std::size_t sChildCount( const IndexedNode<T>* node )
+inline static std::size_t sChildCount( const IndexedNode<T>* node )
 {
     if ( !node )
     {
@@ -273,7 +279,71 @@ TEST_DEF( leftCountsAreValid )
     return true;
 }
 
-bool IndexedRedBlackTreeTest::serializeIntIsValid()
+TEST_DEF( getByIndexIsValid )
+{
+    std::size_t i = 0;
+    for ( auto it = tree.cbegin(); it != tree.cend(); ++it )
+    {
+        if ( *it != tree.getByIndex( i++ ) )
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+TEST_DEF( findByIndexIsValid )
+{
+    std::size_t i = 0;
+    for ( auto it = tree.cbegin(); it != tree.cend(); ++it )
+    {
+        if ( it != tree.findByIndex( i++ ) )
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+inline bool IndexedRedBlackTreeTest::eraseByIndex0IsValid( IndexedRedBlackTree<std::size_t>& tree )
+{
+    auto copy = tree;
+
+    for ( size_t i = 0, size = tree.size(); i < size; ++i )
+    {
+        auto it1 = tree.eraseByIndex( 0 );
+        auto it2 = copy.erase( i );
+
+        if ( it1 == tree.end() && it2 == copy.end() )
+        {
+            continue;
+        }
+
+        if ( *it1 != *it2 ||
+             tree != copy )
+        {
+            return false;
+        }
+    }
+    return tree.size() == 0 && copy.size() == 0;
+}
+
+bool IndexedRedBlackTreeTest::eraseByIndexIsValid( IndexedRedBlackTree<std::size_t>& tree, size_t i )
+{
+    auto copy = tree;
+
+    auto it1 = tree.eraseByIndex( i );
+    auto it2 = copy.erase( i );
+
+    return
+        copy.size() == tree.size() &&
+        *it1 == *it2 &&
+        tree == copy;
+}
+
+inline bool IndexedRedBlackTreeTest::serializeIntIsValid()
 {
     IndexedRedBlackTree<int> rbt;
 
@@ -350,7 +420,7 @@ bool IndexedRedBlackTreeTest::serializeIntIsValid()
     return test == ref;
 }
 
-bool IndexedRedBlackTreeTest::serializeStringIsValid()
+inline bool IndexedRedBlackTreeTest::serializeStringIsValid()
 {
     IndexedRedBlackTree<std::string> rbt
     {

@@ -104,7 +104,7 @@ TEST_DEF( isBinarySearchTree )
 }
 
 template<typename T>
-bool allPointersAreValidImpl( const Node<T>* node )
+inline bool allPointersAreValidImpl( const Node<T>* node )
 {
     if ( node == nullptr )
     {
@@ -129,7 +129,7 @@ TEST_DEF( rootIsBlack )
 }
 
 template<typename T>
-bool bothChildrenOfRedAreBlackImpl( const Node<T>* node )
+inline bool bothChildrenOfRedAreBlackImpl( const Node<T>* node )
 {
     if ( node == nullptr )
     {
@@ -150,7 +150,7 @@ TEST_DEF( bothChildrenOfRedAreBlack )
 }
 
 template<typename T>
-std::pair<bool, std::size_t> blackLengthIsCorrectForEveryNodeImpl( const Node<T>* node, std::size_t blackLength )
+inline std::pair<bool, std::size_t> blackLengthIsCorrectForEveryNodeImpl( const Node<T>* node, std::size_t blackLength )
 {
     if ( node == nullptr )
     {
@@ -242,7 +242,7 @@ TEST_DEF( eraseIsValid )
     return true;
 }
 
-bool RedBlackTreeTest::serializeIntIsValid()
+inline bool RedBlackTreeTest::serializeIntIsValid()
 {
     RedBlackTree<int> rbt;
 
@@ -309,7 +309,7 @@ bool RedBlackTreeTest::serializeIntIsValid()
     return test == ref;
 }
 
-bool RedBlackTreeTest::serializeStringIsValid()
+inline bool RedBlackTreeTest::serializeStringIsValid()
 {
     RedBlackTree<std::string> rbt
     {

@@ -455,8 +455,8 @@ inline typename RedBlackTreeBase<T, IsIndexed, Less>::iterator
     {
         //Current's color is Red and it has maximum one child and color of this child must be Black.
         //So, both child of current are null (because of equal blackLength for current node).
-        ASSERT_NULL( current->left );
-        ASSERT_NULL( current->right );
+        RBT_ASSERT_NULL( current->left );
+        RBT_ASSERT_NULL( current->right );
         currentUnique.reset();
         return next;
     }
@@ -476,15 +476,15 @@ inline typename RedBlackTreeBase<T, IsIndexed, Less>::iterator
     }
     //currentsChild == nullptr because of equal blackLength for current node.
     //So, current is a Black leaf
-    ASSERT_NULL( current->left );
-    ASSERT_NULL( current->right );
+    RBT_ASSERT_NULL( current->left );
+    RBT_ASSERT_NULL( current->right );
 
     currentUnique.reset();
 
     fixAfterErase_( currentsParent, removedNodeIsLeft );
     if ( !m_root ) // if removed the last element of container - root
     {
-        ASSERT( m_size == 0 );
+        RBT_ASSERT( m_size == 0 );
         next = end();
     }
     return next;
@@ -584,7 +584,7 @@ inline std::string RedBlackTreeBase<T, IsIndexed, Less>::serialize( bool compact
 template<typename T, bool IsIndexed, typename Less>
 inline void RedBlackTreeBase<T, IsIndexed, Less>::rotateLeft_( std::unique_ptr<NodeT>& node )
 {
-    ASSERT_NOT_NULL( node->right );
+    RBT_ASSERT_NOT_NULL( node->right );
     if ( node->right == nullptr )
     {
         return;
@@ -615,7 +615,7 @@ inline void RedBlackTreeBase<T, IsIndexed, Less>::rotateLeft_( std::unique_ptr<N
 template<typename T, bool IsIndexed, typename Less>
 inline void RedBlackTreeBase<T, IsIndexed, Less>::rotateRight_( std::unique_ptr<NodeT>& node )
 {
-    ASSERT_NOT_NULL( node->left );
+    RBT_ASSERT_NOT_NULL( node->left );
     if ( node->left == nullptr )
     {
         return;
@@ -773,7 +773,7 @@ inline void RedBlackTreeBase<T, IsIndexed, Less>::fixAfterInsert_( NodeT* insert
     }
     else
     {
-        ASSERT( !"Invalid case" );
+        RBT_ASSERT( !"Invalid case" );
     }
 }
 
@@ -788,7 +788,7 @@ inline void RedBlackTreeBase<T, IsIndexed, Less>::fixAfterErase_( NodeT* parent,
 
     auto sibling = removedNodeIsLeft ?
         parent->right.get() : parent->left.get();
-    ASSERT_NOT_NULL( sibling ); //sibling must not be nullptr, because of equal blackLength for parent
+    RBT_ASSERT_NOT_NULL( sibling ); //sibling must not be nullptr, because of equal blackLength for parent
 
     if ( sibling->color == Color::Red )
     {
@@ -809,7 +809,7 @@ inline void RedBlackTreeBase<T, IsIndexed, Less>::fixAfterErase_( NodeT* parent,
 
     sibling = removedNodeIsLeft ?
         parent->right.get() : parent->left.get();
-    ASSERT_NOT_NULL( sibling ); //sibling must not be nullptr, because of equal blackLength for parent
+    RBT_ASSERT_NOT_NULL( sibling ); //sibling must not be nullptr, because of equal blackLength for parent
 
     if ( parent->color == Color::Black &&
         ( sibling->left == nullptr || sibling->left->color == Color::Black ) &&
@@ -871,7 +871,7 @@ inline void RedBlackTreeBase<T, IsIndexed, Less>::fixAfterErase_( NodeT* parent,
 
     sibling = removedNodeIsLeft ?
         parent->right.get() : parent->left.get();
-    ASSERT_NOT_NULL( sibling ); //sibling must not be nullptr, because of equal blackLength for parent
+    RBT_ASSERT_NOT_NULL( sibling ); //sibling must not be nullptr, because of equal blackLength for parent
 
     sibling->color = parent->color;
     parent->color = Color::Black;

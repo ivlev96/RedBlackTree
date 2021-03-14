@@ -1,5 +1,38 @@
 #pragma once
-#include "rapidjson/document.h"
+#include <rapidjson/document.h>
+#include <string>
+#include <memory>
+
+#if defined(_DEBUG)
+
+#ifndef RBT_ASSERT
+#define RBT_ASSERT(X) _ASSERT(X)
+#endif
+
+#ifndef RBT_VERIFY
+#define RBT_VERIFY(X) _ASSERT(X)
+#endif
+
+#else
+
+#ifndef RBT_ASSERT
+#define RBT_ASSERT(X)
+#endif 
+
+#ifndef RBT_VERIFY
+#define RBT_VERIFY(X) (X)
+#endif 
+
+#endif
+
+#ifndef RBT_ASSERT_NOT_NULL
+#define RBT_ASSERT_NOT_NULL(X) RBT_ASSERT((X) != nullptr)
+#endif
+
+#ifndef RBT_ASSERT_NULL
+#define RBT_ASSERT_NULL(X) RBT_ASSERT((X) == nullptr)
+#endif
+
 
 template<typename T>
 rapidjson::Value toJson( const T& val )
